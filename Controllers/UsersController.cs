@@ -8,11 +8,17 @@ using Thesis;
 
 namespace Thesis_backend.Controllers
 {
-    public struct UserRequest
+    public record UserCreateRequest
     {
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public required string? UserName { get; set; }
+        public required string? Email { get; set; }
+        public required string? Password { get; set; }
+    }
+
+    public record UserLoginRequest
+    {
+        public required string UserIdentification { get; set; }
+        public required string Password { get; set; }
     }
 
     [ApiController]
@@ -38,7 +44,7 @@ namespace Thesis_backend.Controllers
             return OkOrNotFound<User>(await Get<User>(Convert.ToInt64(storedUserId)));
         }
 
-        [HttpGet("Logout")]
+        [HttpDelete("Logout")]
         public IActionResult Logout()
         {
             if (CheckUserLoggedIn())
@@ -51,9 +57,9 @@ namespace Thesis_backend.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] UserRequest request)
+        public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
-            User? user = await Database.Users.All.Include(u => u.UserSettings).SingleOrDefaultAsync(x => x.Username == request.UserName || x.Email == request.Email);
+            User? user = await Database.Users.All.Include(u => u.UserSettings).SingleOrDefaultAsync(x => x.Username == request.UserIdentification || x.Email == request.UserIdentification);
             if (user == null)
             {
                 return NotFound("Can't find user with this email or password");
@@ -69,7 +75,7 @@ namespace Thesis_backend.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] UserRequest request)
+        public async Task<IActionResult> Register([FromBody] UserCreateRequest request)
         {
             User newUser = new User()
             {

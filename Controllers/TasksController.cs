@@ -105,7 +105,7 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("No task found with this Id");
             }
-            if (task.LastCompleted.AddSeconds(task.PeriodRate) >= DateTime.Now)
+            if (task.LastCompleted.AddMinutes(task.PeriodRate) >= DateTime.Now)
             {
                 return BadRequest("The task can't be completed yet");
             }
