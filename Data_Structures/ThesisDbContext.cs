@@ -54,7 +54,8 @@ namespace Thesis_backend.Data_Structures
             {
                 entity.HasKey(e => e.ID);
                 entity.HasOne<User>(u => u.User)
-                .WithOne(t => t.UserSettings);
+                .WithOne(t => t.UserSettings)
+                .HasForeignKey<UserSettings>(fk => fk.UserId);
             });
         }
 

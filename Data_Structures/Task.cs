@@ -12,7 +12,7 @@ namespace Thesis_backend.Data_Structures
         public DateTime Added { get; set; }
         public DateTime LastCompleted { get; set; }
         public bool Completed { get; set; }
-
+        [JsonIgnore]
         public override object Serialize => new { ID, TaskType, PeriodRate, Added, LastCompleted, Completed };
     }
 }

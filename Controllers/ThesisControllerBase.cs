@@ -32,7 +32,6 @@ namespace Thesis_backend.Controllers
         {
             try
             {
-                //Create would check the CompanyHashID, but it would not be resolveable before the creation of said object
                 return await Database.GetTableManager<T>().Create(instance);
             }
             catch

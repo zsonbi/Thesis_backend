@@ -21,6 +21,16 @@ namespace Thesis_backend
                 builder.Configuration.GetConnectionString("ThesisDbContext") ?? "",
             };
 
+            builder.Services.AddDistributedMemoryCache();
+
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.Name = "loggedInUserId";
+                options.IdleTimeout = TimeSpan.FromSeconds(3600);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
             builder.Services.AddDbContext<ThesisDbContext>(options =>
             options.UseMySql(connectionStrings[0],
             new MySqlServerVersion(new Version(10, 5, 9))));
@@ -39,6 +49,8 @@ namespace Thesis_backend
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.UseSession();
 
             app.Run();
         }

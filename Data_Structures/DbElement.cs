@@ -7,7 +7,7 @@ namespace Thesis_backend.Data_Structures
     public abstract record DbElement
     {
         [JsonIgnore][Key] public long ID { get; set; }
-
+        [JsonIgnore]
         public virtual object Serialize { get => JsonSerializer.Serialize(this); }
     }
 }
