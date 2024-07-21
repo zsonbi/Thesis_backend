@@ -1,0 +1,180 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Thesis;
+using Thesis_backend.Data_Structures;
+
+namespace Thesis_backend.Controllers
+{
+    public record TaskRequest
+    {
+        public required string TaskName { get; set; }
+        public string Description { get; set; } = String.Empty;
+        public required int PeriodRate { get; set; }
+        public required bool TaskType { get; set; }
+    }
+
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TasksController : ThesisControllerBase
+    {
+        private readonly ILogger<UsersController> _logger;
+
+        public TasksController(ThesisDbContext database, ILogger<UsersController> logger) : base(database)
+        {
+            _logger = logger;
+        }
+
+        [HttpGet("{ID}")]
+        public async Task<IActionResult> GetTask(string ID)
+        {
+            long convertedID;
+            if (!long.TryParse(ID, out convertedID))
+            {
+                return NotFound("Incorrect ID format");
+            }
+
+            Data_Structures.Task? task = await Database.Tasks.All.Include(u => u.TaskOwner).SingleOrDefaultAsync(x => x.ID == convertedID && x.TaskOwner.ID == GetLoggedInUser());
+            if (task is null)
+            {
+                return NotFound("No task with the following id");
+            }
+            return Ok(task.Serialize);
+        }
+
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAllTasks()
+        {
+            User? user = await Database.Users.All.Include(u => u.UserTasks).SingleOrDefaultAsync(x => x.ID == Convert.ToInt64(HttpContext.Session.GetString("UserId")));
+
+            if (user == null)
+            {
+                return NotFound("No user is logged in");
+            }
+
+            return Ok(user.UserTasks?.Select(x => x.Serialize));
+        }
+
+        [HttpPost("Create")]
+        public async Task<IActionResult> CreateTask([FromBody] TaskRequest request)
+        {
+            User? user = await Database.Users.All.Include(u => u.UserTasks).SingleOrDefaultAsync(x => x.ID == Convert.ToInt64(HttpContext.Session.GetString("UserId")));
+
+            if (user == null)
+            {
+                return NotFound("No user is logged in");
+            }
+
+            Data_Structures.Task taskToSave = new Data_Structures.Task()
+            {
+                TaskName = request.TaskName,
+                Description = request.Description,
+                Updated = DateTime.Now,
+                TaskType = request.TaskType,
+                TaskOwner = user,
+                Completed = false,
+                PeriodRate = request.PeriodRate,
+            };
+
+            Data_Structures.Task? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType);
+
+            if (existingTask is null)
+            {
+                if (!await Create(taskToSave))
+                {
+                    return Conflict("Can't create this task");
+                }
+                return CreatedAtAction(nameof(GetTask), new { id = taskToSave.ID }, taskToSave.Serialize);
+            }
+            else
+            {
+                return Conflict($"Task in this tasktype with the following name: {existingTask.TaskName} already exist");
+            }
+        }
+
+        [HttpPatch("{ID}/Complete")]
+        public async Task<IActionResult> CompleteTask(string ID)
+        {
+            long? loggedInUser = GetLoggedInUser();
+            if (loggedInUser == 0)
+            {
+                return NotFound("Not logged in");
+            }
+
+            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID);
+            if (task is null)
+            {
+                return NotFound("No task found with this Id");
+            }
+            if (task.LastCompleted.AddSeconds(task.PeriodRate) >= DateTime.Now)
+            {
+                return BadRequest("The task can't be completed yet");
+            }
+
+            task.Completed = true;
+            task.LastCompleted = DateTime.Now;
+
+            if (await Update<Data_Structures.Task>(task))
+            {
+                return Ok(task.Serialize);
+            }
+            else
+            {
+                return NotFound("Couldn't update the task");
+            }
+        }
+
+        [HttpPatch("{ID}/Update")]
+        public async Task<IActionResult> UpdateTask(string ID, [FromBody] TaskRequest request)
+        {
+            long? loggedInUser = GetLoggedInUser();
+            if (loggedInUser == 0)
+            {
+                return NotFound("Not logged in");
+            }
+
+            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
+            if (task is null)
+            {
+                return NotFound("No task found with this Id");
+            }
+            task.PeriodRate = request.PeriodRate;
+            task.TaskName = request.TaskName;
+            task.TaskType = request.TaskType;
+            task.Description = request.Description;
+
+            if (await Update<Data_Structures.Task>(task))
+            {
+                return Ok(task.Serialize);
+            }
+            else
+            {
+                return NotFound("Couldn't update the task");
+            }
+        }
+
+        [HttpDelete("{ID}")]
+        public async Task<IActionResult> DeleteTask(string ID)
+        {
+            long? loggedInUser = GetLoggedInUser();
+            if (loggedInUser == 0)
+            {
+                return NotFound("Not logged in");
+            }
+
+            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
+            if (task is null)
+            {
+                return NotFound("No task found with this Id");
+            }
+
+            if (await Delete<Data_Structures.Task>(task))
+            {
+                return Ok("Deleted");
+            }
+            else
+            {
+                return NotFound("Failed to delete task");
+            }
+        }
+    }
+}

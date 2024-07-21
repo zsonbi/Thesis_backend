@@ -41,8 +41,7 @@ namespace Thesis_backend.Controllers
         [HttpGet("Logout")]
         public IActionResult Logout()
         {
-            string? storedUserId = HttpContext.Session.GetString("UserId");
-            if (storedUserId is null)
+            if (CheckUserLoggedIn())
             {
                 return NotFound("Not logged in");
             }

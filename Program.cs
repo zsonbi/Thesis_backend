@@ -33,6 +33,7 @@ namespace Thesis_backend
 
             builder.Services.AddDbContext<ThesisDbContext>(options =>
             options.UseMySql(connectionStrings[0],
+
             new MySqlServerVersion(new Version(10, 5, 9))));
 
             var app = builder.Build();

@@ -9,12 +9,18 @@ namespace Thesis_backend.Controllers
     {
         protected readonly ThesisDbContext Database;
 
+        public long? GetLoggedInUserId => Convert.ToInt64(HttpContext.Session.GetString("UserId"));
+
         public ThesisControllerBase(ThesisDbContext database)
         {
             Database = database;
         }
 
-        //LogoDbContext actions
+        protected long? GetLoggedInUser()
+        {
+            long.TryParse(HttpContext.Session.GetString("UserId"), out long userId);
+            return userId;
+        }
 
         protected async Task<T?> Get<T>(long id) where T : DbElement
         {
@@ -26,6 +32,24 @@ namespace Thesis_backend.Controllers
             {
                 return null;
             }
+        }
+
+        protected async Task<T?> Get<T>(string id) where T : DbElement
+        {
+            long.TryParse(id, out long parsedId);
+            try
+            {
+                return await Database.GetTableManager<T>().Get(parsedId);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        protected bool CheckUserLoggedIn()
+        {
+            return HttpContext.Session.GetString("UserId") is not null;
         }
 
         protected async Task<bool> Create<T>(T instance) where T : DbElement
@@ -50,6 +74,34 @@ namespace Thesis_backend.Controllers
             {
                 return false;
             }
+        }
+
+        protected async Task<T?> Update<T>(string id, Func<T, T?> updateRule) where T : DbElement
+        {
+            T? instance = await Get<T>(id);
+            if (instance is null)
+            {
+                return null;
+            }
+
+            return await Update(instance, updateRule);
+        }
+
+        protected async Task<T?> Update<T>(T instance, Func<T, T?> updateRule) where T : DbElement
+        {
+            T? updated = updateRule(instance);
+            if (updated is null
+                || updated.ID != instance.ID)
+            {
+                return null;
+            }
+
+            if (!await Update(updated))
+            {
+                return null;
+            }
+
+            return updated;
         }
 
         protected async Task<bool> Delete<T>(long id) where T : DbElement
