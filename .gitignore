@@ -8,7 +8,7 @@ Logs/
 # Generated files
 project.lock.json
 .vs/
-
+DbData
 # mstest test results
 TestResults
 

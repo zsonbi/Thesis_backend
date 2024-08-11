@@ -24,7 +24,7 @@ services:
        MYSQL_PASSWORD: test_password
     volumes:
         - ./docker/initSQL/:/docker-entrypoint-initdb.d/
-        # - ./DbData/:/var/lib/mysql/
+        - ./DbData/:/var/lib/mysql/
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 1m
@@ -38,6 +38,30 @@ services:
 
     ports:
       - "3306:3306"
+
+  thesis:
+    tty: true
+    stdin_open: true
+    image: logo
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    # volumes:
+    #   - ./LogoBackend/Data:/app/Data
+    environment:
+      - ASPNETCORE_URLS=http://[..]:8000
+    restart: unless-stopped
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_started
+    networks:
+      logo-internal-network:
+        ipv4_address: 10.90.1.12
+
+
 
 networks:
   logo-internal-network:
