@@ -65,7 +65,7 @@ services:
 
 
 networks:
-  logo-internal-network:
+  thesis-internal-network:
     name: logo_internal_network
     driver: bridge
     ipam:
