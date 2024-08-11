@@ -12,6 +12,8 @@ WORKDIR /src
 COPY ["Thesis_backend.csproj", "."]
 RUN dotnet restore "./Thesis_backend.csproj"
 COPY . .
+RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.json
+RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.Development.json
 WORKDIR "/src/."
 RUN dotnet build "./Thesis_backend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
