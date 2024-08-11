@@ -25,6 +25,7 @@ services:
     volumes:
         - ./docker/initSQL/:/docker-entrypoint-initdb.d/
         - ./DbData/:/var/lib/mysql/
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 1m
