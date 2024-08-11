@@ -6,8 +6,8 @@ WORKDIR .
 RUN mkdir /app
 COPY ./ /app
 WORKDIR /app
-RUN sed -ir "s/Server=[^;]*;/Server=10.90.1.11;/g" ./appsettings.json
-RUN sed -ir "s/Server=[^;]*;/Server=10.90.1.11;/g" ./appsettings.Development.json
+RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.json
+RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.Development.json
 
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
