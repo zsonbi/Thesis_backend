@@ -12,7 +12,7 @@ services:
     volumes:
       - ./MIGRATIONS:/app/MIGRATIONS  
     networks:
-      logo-internal-network:
+      thesis-internal-network:
         ipv4_address: 10.110.1.13
 
 
@@ -34,7 +34,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      logo-internal-network:
+      thesis-internal-network:
         ipv4_address: 10.110.1.11
 
     ports:
@@ -59,7 +59,7 @@ services:
       mariadb:
         condition: service_started
     networks:
-      logo-internal-network:
+      thesis-internal-network:
         ipv4_address: 10.110.1.12
 
 
