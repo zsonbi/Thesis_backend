@@ -37,9 +37,6 @@ services:
       thesis-internal-network:
         ipv4_address: 10.110.1.11
 
-    ports:
-      - "3306:3306"
-
   thesis:
     tty: true
     stdin_open: true
