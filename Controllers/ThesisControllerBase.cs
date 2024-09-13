@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Thesis_backend.Data_Structures;
 using System.Text.Json;
+using Microsoft.AspNetCore.Cors;
 
 namespace Thesis_backend.Controllers
 {
+    [EnableCors]
     [ApiController]
     public class ThesisControllerBase : ControllerBase
     {
