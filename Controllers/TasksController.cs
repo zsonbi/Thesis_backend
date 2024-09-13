@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Thesis;
 using Thesis_backend.Data_Structures;
@@ -13,6 +14,7 @@ namespace Thesis_backend.Controllers
         public required bool TaskType { get; set; }
     }
 
+    [EnableCors]
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ThesisControllerBase

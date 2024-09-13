@@ -31,22 +31,22 @@ namespace Thesis_backend
                 options.Cookie.IsEssential = true;
             });
 
-            var MyAllowSpecificOrigins = "myDomains";
+            //var MyAllowSpecificOrigins = "myDomains";
 
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy(name: MyAllowSpecificOrigins,
+            //builder.Services.AddCors(options =>
+            //{
+            //    options.AddPolicy(name: MyAllowSpecificOrigins,
 
-                    policy =>
-                                  {
-                                      policy.WithOrigins("http://thesis.picidolgok.hu",
-                                                          "http://picidolgok.hu",
-                                                          "http://localhost"
-                                                          , "https://zsonbi.github.io/")
-                                            .AllowAnyHeader()
-                                            .AllowAnyMethod(); ;
-                                  });
-            });
+            //        policy =>
+            //                      {
+            //                          policy.WithOrigins("http://thesis.picidolgok.hu",
+            //                                              "http://picidolgok.hu",
+            //                                              "http://localhost"
+            //                                              , "https://zsonbi.github.io/")
+            //                                .AllowAnyHeader()
+            //                                .AllowAnyMethod(); ;
+            //                      });
+            //});
 
             builder.Services.AddDbContext<ThesisDbContext>(options =>
             options.UseMySql(connectionStrings[0],
@@ -55,7 +55,16 @@ namespace Thesis_backend
 
             var app = builder.Build();
             // Enable CORS globally
-            app.UseCors(MyAllowSpecificOrigins);
+
+            // Here, you're allowing CORS for an array of specific domains.
+            app.UseCors(builder =>
+                    builder
+                    .WithOrigins("http://thesis.picidolgok.hu",
+                                                          "http://picidolgok.hu",
+                                                         "http://localhost"
+                                                         , "https://zsonbi.github.io/")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

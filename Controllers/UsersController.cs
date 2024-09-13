@@ -5,6 +5,7 @@ using Thesis_backend.Data_Structures;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Security.Cryptography;
 using Thesis;
+using Microsoft.AspNetCore.Cors;
 
 namespace Thesis_backend.Controllers
 {
@@ -21,6 +22,7 @@ namespace Thesis_backend.Controllers
         public required string Password { get; set; }
     }
 
+    [EnableCors]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ThesisControllerBase
