@@ -45,10 +45,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+      - "8081:8081"
+    volumes:
+      -  /etc/letsencrypt/live/thesis.picidolgok.hu/fullchain.pem
+      -  /etc/letsencrypt/live/thesis.picidolgok.hu/privkey.pem
     # volumes:
     #   - ./LogoBackend/Data:/app/Data
     environment:
       - ASPNETCORE_URLS=http://[..]:8000
+      - ASPNETCORE_URLS=https://[..]:8081
     restart: unless-stopped
     depends_on:
       migration:
