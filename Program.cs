@@ -53,6 +53,8 @@ namespace Thesis_backend
 
             app.UseSession();
 
+            app.UseCors();
+
             app.Run();
         }
     }
