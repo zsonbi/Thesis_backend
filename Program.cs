@@ -36,19 +36,8 @@ namespace Thesis_backend
 
             new MySqlServerVersion(new Version(10, 5, 9))));
 
-            // Configure CORS
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    builder => builder.AllowAnyOrigin()
-                                      .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials()); // Allow credentials if needed
-            });
-
             var app = builder.Build();
             // Enable CORS globally
-            app.UseCors("AllowAll");
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
