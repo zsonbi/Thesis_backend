@@ -36,12 +36,15 @@ namespace Thesis_backend
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
-                                  policy =>
+
+                    policy =>
                                   {
                                       policy.WithOrigins("http://thesis.picidolgok.hu",
                                                           "http://picidolgok.hu",
                                                           "http://localhost"
-                                                          , "https://zsonbi.github.io/");
+                                                          , "https://zsonbi.github.io/")
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod(); ;
                                   });
             });
 
