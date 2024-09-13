@@ -40,7 +40,8 @@ namespace Thesis_backend
                                   {
                                       policy.WithOrigins("http://thesis.picidolgok.hu",
                                                           "http://picidolgok.hu",
-                                                          "http://localhost");
+                                                          "http://localhost"
+                                                          , "https://zsonbi.github.io/");
                                   });
             });
 
