@@ -31,6 +31,19 @@ namespace Thesis_backend
                 options.Cookie.IsEssential = true;
             });
 
+            var MyAllowSpecificOrigins = "myDomains";
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("http://thesis.picidolgok.hu",
+                                                          "http://picidolgok.hu",
+                                                          "http://localhost");
+                                  });
+            });
+
             builder.Services.AddDbContext<ThesisDbContext>(options =>
             options.UseMySql(connectionStrings[0],
 
@@ -38,6 +51,7 @@ namespace Thesis_backend
 
             var app = builder.Build();
             // Enable CORS globally
+            app.UseCors(MyAllowSpecificOrigins);
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
