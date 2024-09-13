@@ -47,7 +47,8 @@ namespace Thesis_backend
             });
 
             var app = builder.Build();
-
+            // Enable CORS globally
+            app.UseCors("AllowAll");
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
