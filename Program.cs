@@ -49,7 +49,7 @@ namespace Thesis_backend
 
             var app = builder.Build();
             // Enable CORS globally
-            app.UseCors();
+            app.UseCors("AllowEverything");
             // Here, you're allowing CORS for an array of specific domains.
             //app.UseCors(builder =>
             //        builder
