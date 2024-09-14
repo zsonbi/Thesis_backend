@@ -57,16 +57,7 @@ namespace Thesis_backend
 
             // Enable CORS globally
             app.UseCors("AllowEverything");
-            // Here, you're allowing CORS for an array of specific domains.
-            //app.UseCors(builder =>
-            //        builder
-            //        .WithOrigins("http://thesis.picidolgok.hu",
-            //                                              "http://picidolgok.hu",
-            //                                             "http://localhost"
-            //                                             , "https://zsonbi.github.io")
-            //        .AllowAnyMethod()
-            //        .AllowAnyHeader());
-            // Configure the HTTP request pipeline.
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
