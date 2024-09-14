@@ -47,7 +47,7 @@ services:
       - "8000:8000"
       - "8001:8001"
     volumes:
-      -  /etc/letsencrypt/live/thesis.picidolgok.hu/fullchain.pem:/app/certs/fullchain.pen
+      -  /etc/letsencrypt/live/thesis.picidolgok.hu/fullchain.pem:/app/certs/fullchain.pem
       -  /etc/letsencrypt/live/thesis.picidolgok.hu/privkey.pem:/app/certs/privkey.pem 
     # volumes:
     #   - ./LogoBackend/Data:/app/Data
