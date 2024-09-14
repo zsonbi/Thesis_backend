@@ -34,10 +34,10 @@ namespace Thesis_backend
 
             builder.Services.AddCors(options =>
              {
-                 options.AddPolicy("AllowEverything", // This is the open house we talked about!
+                 options.AddPolicy("AllowTrusted", // This is the open house we talked about!
                      builder =>
                      {
-                         builder.AllowAnyOrigin() // Any origin is welcome...
+                         builder.WithOrigins("https://zsonbi.github.io/", "https://thesis.picidolgok.hu", "http://thesis.picidolgok.hu")
                              .AllowAnyHeader() // With any type of headers...
                              .AllowAnyMethod(); // And any HTTP methods. Such a jolly party indeed!
                      });
@@ -57,7 +57,7 @@ namespace Thesis_backend
             app.UseHttpsRedirection();
 
             // Enable CORS globally
-            app.UseCors("AllowEverything");
+            app.UseCors("AllowTrusted");
 
             if (app.Environment.IsDevelopment())
             {
