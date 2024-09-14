@@ -27,8 +27,9 @@ namespace Thesis_backend
             {
                 options.Cookie.Name = "loggedInUserId";
                 options.IdleTimeout = TimeSpan.FromSeconds(3600);
-                options.Cookie.HttpOnly = true;
+                options.Cookie.HttpOnly = false;
                 options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.None;
             });
 
             builder.Services.AddCors(options =>
