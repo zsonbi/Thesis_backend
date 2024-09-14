@@ -46,8 +46,15 @@ namespace Thesis_backend
             options.UseMySql(connectionStrings[0],
 
             new MySqlServerVersion(new Version(10, 5, 9))));
-
+            builder.Services.AddHttpsRedirection(options =>
+            {
+                options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+                options.HttpsPort = 5001;
+            });
             var app = builder.Build();
+
+            app.UseHttpsRedirection();
+
             // Enable CORS globally
             app.UseCors("AllowEverything");
             // Here, you're allowing CORS for an array of specific domains.
