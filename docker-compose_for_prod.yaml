@@ -54,6 +54,8 @@ services:
     environment:
       # - ASPNETCORE_URLS=http://[..]:8000
       - ASPNETCORE_URLS=http://*:8000;https://*:8001
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/certs/fullchain.pem
+      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/certs/privkey.pem 
     restart: unless-stopped
     depends_on:
       migration:
