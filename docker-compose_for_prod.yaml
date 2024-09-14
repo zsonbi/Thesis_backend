@@ -52,8 +52,8 @@ services:
     # volumes:
     #   - ./LogoBackend/Data:/app/Data
     environment:
-      - ASPNETCORE_URLS=http://[..]:8000
-      - ASPNETCORE_URLS=https://[..]:8001
+      # - ASPNETCORE_URLS=http://[..]:8000
+      - ASPNETCORE_URLS=http://*:8000;https://*:8001
     restart: unless-stopped
     depends_on:
       migration:
