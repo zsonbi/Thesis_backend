@@ -55,8 +55,6 @@ namespace Thesis_backend
             });
             var app = builder.Build();
 
-            app.UseHttpsRedirection();
-
             // Enable CORS globally
             app.UseCors("AllowTrusted");
 
