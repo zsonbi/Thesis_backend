@@ -39,7 +39,8 @@ namespace Thesis_backend
                      {
                          builder.WithOrigins("https://zsonbi.github.io/Thesis/game/", "https://thesis.picidolgok.hu", "http://thesis.picidolgok.hu")
                              .AllowAnyHeader() // With any type of headers...
-                             .AllowAnyMethod(); // And any HTTP methods. Such a jolly party indeed!
+                             .AllowAnyMethod() // And any HTTP methods. Such a jolly party indeed!
+                             .AllowCredentials();
                      });
              });
 
