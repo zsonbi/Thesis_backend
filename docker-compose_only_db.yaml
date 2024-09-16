@@ -12,8 +12,8 @@ services:
     volumes:
       - ./MIGRATIONS:/app/MIGRATIONS  
     networks:
-      logo-internal-network:
-        ipv4_address: 10.90.1.13
+      thesis-internal-network:
+        ipv4_address: 10.110.1.13
 
 
   mariadb:
@@ -33,17 +33,16 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      logo-internal-network:
-        ipv4_address: 10.90.1.11
-
+      thesis-internal-network:
+        ipv4_address: 10.110.1.11
     ports:
       - "3306:3306"
 
 networks:
-  logo-internal-network:
-    name: logo_internal_network
+  thesis-internal-network:
+    name: thesis_internal_network
     driver: bridge
     ipam:
       config:
-        - subnet: 10.90.0.0/16
-          gateway: 10.90.0.1
+        - subnet: 10.110.0.0/16
+          gateway: 10.110.0.1

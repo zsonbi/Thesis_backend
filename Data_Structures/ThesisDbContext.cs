@@ -10,9 +10,14 @@ namespace Thesis_backend.Data_Structures
         public DbSet<Task> TasksTable { get; set; }
         public DbSet<Game> GamesTable { get; set; }
         public DbSet<UserSettings> UserSettingsTable { get; set; }
+        public DbSet<Friend> FriendsTable { get; set; }
 
         public DataTable<User> Users { get; set; }
         public DataTable<Task> Tasks { get; set; }
+
+        public DataTable<Friend> Friends { get; set; }
+
+
         public DataTable<UserSettings> UserSettings { get; set; }
 
         public ThesisDbContext(DbContextOptions<ThesisDbContext> options)
@@ -21,6 +26,7 @@ namespace Thesis_backend.Data_Structures
             Users = new DataTable<User>(this, UsersTable!);
             Tasks = new DataTable<Task>(this, TasksTable!);
             UserSettings = new DataTable<UserSettings>(this, UserSettingsTable!);
+            Friends = new DataTable<Friend>(this, FriendsTable!);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,10 +58,19 @@ namespace Thesis_backend.Data_Structures
 
             modelBuilder.Entity<UserSettings>(entity =>
             {
+
+
                 entity.HasKey(e => e.ID);
                 entity.HasOne<User>(u => u.User)
                 .WithOne(t => t.UserSettings)
                 .HasForeignKey<UserSettings>(fk => fk.UserId);
+            });
+
+            modelBuilder.Entity<Friend>(entity => { 
+                entity.HasKey(e => e.ID);
+                entity.HasOne<User>(u=>u.Sender);
+                entity.HasOne<User>(u=>u.Reciever);
+          
             });
         }
 
