@@ -70,7 +70,7 @@ namespace Thesis_backend.Controllers
             {
                 TaskName = request.TaskName,
                 Description = request.Description,
-                Updated = DateTime.Now,
+                Updated = DateTime.UtcNow,
                 TaskType = request.TaskType,
                 TaskOwner = user,
                 Completed = false,
@@ -107,13 +107,14 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("No task found with this Id");
             }
-            if (task.LastCompleted.AddMinutes(task.PeriodRate) >= DateTime.Now)
+
+            if (task.LastCompleted.AddMinutes(task.PeriodRate) >= DateTime.UtcNow)
             {
                 return BadRequest("The task can't be completed yet");
             }
 
             task.Completed = true;
-            task.LastCompleted = DateTime.Now;
+            task.LastCompleted = DateTime.UtcNow;
 
             if (await Update<Data_Structures.Task>(task))
             {

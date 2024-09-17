@@ -83,8 +83,8 @@ namespace Thesis_backend.Controllers
             {
                 Username = request.UserName,
                 Email = request.Email,
-                LastLoggedIn = DateTime.Now,
-                Registered = DateTime.Now,
+                LastLoggedIn = DateTime.UtcNow,
+                Registered = DateTime.UtcNow,
                 PasswordHash = Crypto.HashPassword(request.Password)
             };
 

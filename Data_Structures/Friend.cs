@@ -7,7 +7,7 @@ namespace Thesis_backend.Data_Structures
         public User? Sender { get; set; }
         public User? Reciever { get; set; }
 
-        public DateTime SentTime { get; set; } = DateTime.Now;
+        public DateTime SentTime { get; set; } = DateTime.UtcNow;
 
         public bool Pending { get; set; } = true;
 

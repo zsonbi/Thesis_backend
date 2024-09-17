@@ -47,7 +47,7 @@ namespace Thesis_backend.Controllers
                 Pending = true,
                 Reciever = reciever,
                 Sender = Database.Users.Get(Convert.ToInt64(storedUserId)).Result,
-                SentTime = DateTime.Now,
+                SentTime = DateTime.UtcNow,
             };
 
             if (!await Create(newFriend))
