@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Text.Json.Serialization;
 
 namespace Thesis_backend.Data_Structures
 {
@@ -10,7 +11,7 @@ namespace Thesis_backend.Data_Structures
         public DateTime SentTime { get; set; } = DateTime.UtcNow;
 
         public bool Pending { get; set; } = true;
-
-        public override object Serialize => new { ID, sender = Sender?.ID, reciever = Reciever?.ID, SentTime, Pending };
+        [JsonIgnore]
+        public override object Serialize => new { ID, sender = Sender?.Serialize, reciever = Reciever?.Serialize, SentTime, Pending };
     }
 }
