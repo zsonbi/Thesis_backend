@@ -86,32 +86,89 @@ namespace Thesis_backend.Controllers
             return Ok(friend.Serialize);
         }
 
-        [HttpGet("{ID}")]
-        public async Task<IActionResult> GetFriend(string ID)
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetFriend()
         {
             if (!CheckUserLoggedIn())
             {
                 return NotFound("Not logged in");
             }
 
-            long convertedID;
-            if (!long.TryParse(ID, out convertedID))
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+
+            var friends = await Database.Friends.All
+            .Include(r => r.Reciever)
+            .Include(s => s.Sender)
+            .Where(x => x.Sender!.ID == loggedInUserId || x.Reciever!.ID == loggedInUserId)
+            .ToArrayAsync();
+
+            if (friends is null)
             {
-                return NotFound("Incorrect ID format");
+                return NotFound("No friend with releated user identification");
             }
 
-            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Reciever).Include(s => s.Sender).SingleOrDefaultAsync(x => x.ID == convertedID);
+            return Ok(friends.Select(x => x.Serialize));
+        }
+
+        [HttpPatch("Accept")]
+        public async Task<IActionResult> AcceptFriendRequest([FromBody] string id)
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+
+            var friend = await Database.Friends.All
+            .Include(r => r.Reciever)
+            .Include(s => s.Sender)
+            .SingleOrDefaultAsync(x => x.Reciever!.ID == loggedInUserId);
 
             if (friend is null)
             {
-                return NotFound("No friend with the following id");
-            }
-            if (!(friend.Sender!.ID == GetLoggedInUser() || friend.Reciever!.ID == GetLoggedInUser()))
-            {
-                return BadRequest("Not releated to you");
+                return NotFound("No friend with releated user identification");
             }
 
-            return Ok(friend.Serialize);
+            if (!friend.Pending)
+            {
+                return BadRequest("Already accepted");
+            }
+
+            friend.Pending = false;
+            if (!await Update(friend))
+            {
+                return BadRequest("Can't update the friend request");
+            }
+            return Ok(friend);
+        }
+
+        [HttpDelete("Delete")]
+        public async Task<IActionResult> RejectFriendRequest([FromBody] string id)
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+
+            var friend = await Database.Friends.All
+            .Include(r => r.Reciever)
+            .Include(s => s.Sender)
+            .SingleOrDefaultAsync(x => x.Reciever!.ID == loggedInUserId);
+
+            if (friend is null)
+            {
+                return NotFound("No friend with releated user identification");
+            }
+            bool pending = friend.Pending;
+            if (!await Delete(friend))
+            {
+                return BadRequest("Can't reject the friend request");
+            }
+
+            return Ok("Rejected");
         }
     }
 }
