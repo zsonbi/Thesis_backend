@@ -29,8 +29,8 @@ namespace Thesis_backend
                 options.IdleTimeout = TimeSpan.FromSeconds(3600);
                 options.Cookie.HttpOnly = false;
                 options.Cookie.IsEssential = true;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.None;
+                //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                // options.Cookie.SameSite = SameSiteMode.None;
             });
 
             builder.Services.AddCors(options =>
@@ -49,11 +49,11 @@ namespace Thesis_backend
             options.UseMySql(connectionStrings[0],
 
             new MySqlServerVersion(new Version(10, 5, 9))));
-            builder.Services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-                options.HttpsPort = 8001;
-            });
+            //builder.Services.AddHttpsRedirection(options =>
+            //{
+            //    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+            //    options.HttpsPort = 8001;
+            //});
             var app = builder.Build();
 
             // Enable CORS globally
@@ -65,7 +65,7 @@ namespace Thesis_backend
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthorization();
 

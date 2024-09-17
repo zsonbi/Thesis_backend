@@ -17,7 +17,6 @@ namespace Thesis_backend.Data_Structures
 
         public DataTable<Friend> Friends { get; set; }
 
-
         public DataTable<UserSettings> UserSettings { get; set; }
 
         public ThesisDbContext(DbContextOptions<ThesisDbContext> options)
@@ -58,19 +57,17 @@ namespace Thesis_backend.Data_Structures
 
             modelBuilder.Entity<UserSettings>(entity =>
             {
-
-
                 entity.HasKey(e => e.ID);
                 entity.HasOne<User>(u => u.User)
                 .WithOne(t => t.UserSettings)
                 .HasForeignKey<UserSettings>(fk => fk.UserId);
             });
 
-            modelBuilder.Entity<Friend>(entity => { 
+            modelBuilder.Entity<Friend>(entity =>
+            {
                 entity.HasKey(e => e.ID);
-                entity.HasOne<User>(u=>u.Sender);
-                entity.HasOne<User>(u=>u.Reciever);
-          
+                entity.HasOne<User>(u => u.Sender);
+                entity.HasOne<User>(u => u.Reciever);
             });
         }
 
@@ -135,6 +132,7 @@ namespace Thesis_backend.Data_Structures
             if (typeof(T) == typeof(User)) return (IDataTable<T>)Users;
             if (typeof(T) == typeof(Task)) return (IDataTable<T>)Tasks;
             if (typeof(T) == typeof(UserSettings)) return (IDataTable<T>)UserSettings;
+            if (typeof(T) == typeof(Friend)) return (IDataTable<T>)Friends;
 
             throw new KeyNotFoundException("No such table is in the db");
         }
