@@ -58,7 +58,7 @@ namespace Thesis_backend.Controllers
             return CreatedAtAction(nameof(GetFriend), new { id = newFriend.ID }, newFriend.Serialize);
         }
 
-        [HttpGet("GetByID/{ID}")]
+        [HttpGet("{ID}/Get")]
         public async Task<IActionResult> GetFriendByID(string ID)
         {
             if (!CheckUserLoggedIn())
@@ -110,8 +110,8 @@ namespace Thesis_backend.Controllers
             return Ok(friends.Select(x => x.Serialize));
         }
 
-        [HttpPatch("Accept")]
-        public async Task<IActionResult> AcceptFriendRequest([FromBody] string id)
+        [HttpPatch("{ID}/Accept")]
+        public async Task<IActionResult> AcceptFriendRequest(string ID)
         {
             if (!CheckUserLoggedIn())
             {
@@ -143,8 +143,8 @@ namespace Thesis_backend.Controllers
             return Ok(friend);
         }
 
-        [HttpDelete("Delete")]
-        public async Task<IActionResult> RejectFriendRequest([FromBody] string id)
+        [HttpDelete("{ID}/Delete")]
+        public async Task<IActionResult> RejectFriendRequest(string ID)
         {
             if (!CheckUserLoggedIn())
             {
