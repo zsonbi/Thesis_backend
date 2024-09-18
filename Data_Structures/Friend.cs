@@ -16,6 +16,6 @@ namespace Thesis_backend.Data_Structures
 
         public bool Pending { get; set; } = true;
         [JsonIgnore]
-        public override object Serialize => new { ID, sender = Sender?.Serialize, reciever = Receiver?.Serialize, SentTime, Pending };
+        public override object Serialize => new { ID, Sender = Sender?.Serialize, Receiver = Receiver?.Serialize, SentTime, Pending };
     }
 }
