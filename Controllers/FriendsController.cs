@@ -144,7 +144,7 @@ namespace Thesis_backend.Controllers
         }
 
         [HttpDelete("{ID}/Delete")]
-        public async Task<IActionResult> RejectFriendRequest(string ID)
+        public async Task<IActionResult> DeleteFriend(string ID)
         {
             if (!CheckUserLoggedIn())
             {
@@ -152,15 +152,26 @@ namespace Thesis_backend.Controllers
             }
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
+            long convertedID;
+
+            if (!long.TryParse(ID, out convertedID))
+            {
+                return NotFound("Incorrect ID format");
+            }
 
             var friend = await Database.Friends.All
             .Include(r => r.Reciever)
             .Include(s => s.Sender)
-            .SingleOrDefaultAsync(x => x.Reciever!.ID == loggedInUserId);
+            .SingleOrDefaultAsync(x => x.ID == convertedID);
 
             if (friend is null)
             {
-                return NotFound("No friend with releated user identification");
+                return NotFound("No friend with such friend id");
+            }
+
+            if ((friend.Reciever?.ID == loggedInUserId || friend.Sender?.ID == loggedInUserId))
+            {
+                return NotFound("You have no such friend :C");
             }
             bool pending = friend.Pending;
             if (!await Delete(friend))
@@ -168,7 +179,7 @@ namespace Thesis_backend.Controllers
                 return BadRequest("Can't reject the friend request");
             }
 
-            return Ok("Rejected");
+            return Ok("Deleted");
         }
     }
 }

@@ -85,7 +85,9 @@ namespace Thesis_backend.Controllers
                 Email = request.Email,
                 LastLoggedIn = DateTime.UtcNow,
                 Registered = DateTime.UtcNow,
-                PasswordHash = Crypto.HashPassword(request.Password)
+                PasswordHash = Crypto.HashPassword(request.Password),
+                Currency = 0,
+                TotalScore = 0,
             };
 
             if (!await Create(newUser))

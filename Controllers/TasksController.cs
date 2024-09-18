@@ -116,7 +116,12 @@ namespace Thesis_backend.Controllers
             task.Completed = true;
             task.LastCompleted = DateTime.UtcNow;
 
-            if (await Update<Data_Structures.Task>(task))
+            bool taskUpdateResult = await Update<Data_Structures.Task>(task);
+            task.TaskOwner.TotalScore += DetermineTaskScore(task.PeriodRate);
+            task.TaskOwner.Currency += DetermineTaskScore(task.PeriodRate);
+            bool userScoreUpdate = await Update<Data_Structures.User>(task.TaskOwner);
+
+            if (taskUpdateResult && userScoreUpdate)
             {
                 return Ok(task.Serialize);
             }
@@ -177,6 +182,41 @@ namespace Thesis_backend.Controllers
             else
             {
                 return NotFound("Failed to delete task");
+            }
+        }
+
+        private long DetermineTaskScore(int periodRate)
+        {
+            switch (periodRate)
+            {
+                case 60:
+                    return (long)TaskScores.Hourly;
+
+                case 120:
+                    return (long)TaskScores.EveryTwoHours;
+
+                case 240:
+                    return (long)TaskScores.EveryFourHours;
+
+                case 1440:
+                    return (long)TaskScores.Daily;
+
+                case 2880:
+                    return (long)TaskScores.EveryTwoDays;
+
+                case 10080:
+                    return (long)TaskScores.Weekly;
+
+                case 20160:
+                    return (long)TaskScores.EveryTwoWeeks;
+
+                case 40320:
+                    return (long)TaskScores.Monthly;
+
+                default:
+                    Console.WriteLine("Can't find such period rate to score");
+                    return 0;
+                    break;
             }
         }
     }
