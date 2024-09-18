@@ -66,14 +66,12 @@ namespace Thesis_backend
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseSession();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
             app.MapControllers();
-
-            app.UseSession();
 
             app.Run();
         }
