@@ -43,7 +43,7 @@ namespace Thesis_backend
                              .AllowAnyMethod() // And any HTTP methods. Such a jolly party indeed!
                              .AllowCredentials()
                              .SetIsOriginAllowedToAllowWildcardSubdomains()
-                             .WithExposedHeaders("Set-Cookie");
+                             .WithExposedHeaders("Set-Cookie", "Content-Type", "Authorization", "X-Requested-With");
                      });
              });
 
