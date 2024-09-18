@@ -39,13 +39,20 @@ namespace Thesis_backend.Controllers
             }
             if (storedUserId == reciever.ID.ToString())
             {
-                return BadRequest("Can't send friend request to yourself");
+                return Conflict("Can't send friend request to yourself");
+            }
+
+            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Receiver).Include(s => s.Sender).SingleOrDefaultAsync(x => x.Receiver!.ID == GetLoggedInUser() && x.Sender!.ID == reciever.ID);
+
+            if (friend is not null)
+            {
+                return Conflict($"You can't send an another friend request to {reciever.Username}");
             }
 
             Friend newFriend = new Friend()
             {
                 Pending = true,
-                Reciever = reciever,
+                Receiver = reciever,
                 Sender = Database.Users.Get(Convert.ToInt64(storedUserId)).Result,
                 SentTime = DateTime.UtcNow,
             };
@@ -72,13 +79,13 @@ namespace Thesis_backend.Controllers
                 return NotFound("Incorrect ID format");
             }
 
-            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Reciever).Include(s => s.Sender).SingleOrDefaultAsync(x => x.ID == convertedID);
+            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Receiver).Include(s => s.Sender).SingleOrDefaultAsync(x => x.ID == convertedID);
 
             if (friend is null)
             {
                 return NotFound("No friend with the following id");
             }
-            if (!(friend.Sender!.ID == GetLoggedInUser() || friend.Reciever!.ID == GetLoggedInUser()))
+            if (!(friend.Sender!.ID == GetLoggedInUser() || friend.Receiver!.ID == GetLoggedInUser()))
             {
                 return BadRequest("Not releated to you");
             }
@@ -97,9 +104,9 @@ namespace Thesis_backend.Controllers
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
             var friends = await Database.Friends.All
-            .Include(r => r.Reciever)
+            .Include(r => r.Receiver)
             .Include(s => s.Sender)
-            .Where(x => x.Sender!.ID == loggedInUserId || x.Reciever!.ID == loggedInUserId)
+            .Where(x => x.Sender!.ID == loggedInUserId || x.Receiver!.ID == loggedInUserId)
             .ToArrayAsync();
 
             if (friends is null)
@@ -121,9 +128,9 @@ namespace Thesis_backend.Controllers
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
             var friend = await Database.Friends.All
-            .Include(r => r.Reciever)
+            .Include(r => r.Receiver)
             .Include(s => s.Sender)
-            .SingleOrDefaultAsync(x => x.Reciever!.ID == loggedInUserId);
+            .SingleOrDefaultAsync(x => x.Receiver!.ID == loggedInUserId);
 
             if (friend is null)
             {
@@ -160,7 +167,7 @@ namespace Thesis_backend.Controllers
             }
 
             var friend = await Database.Friends.All
-            .Include(r => r.Reciever)
+            .Include(r => r.Receiver)
             .Include(s => s.Sender)
             .SingleOrDefaultAsync(x => x.ID == convertedID);
 
@@ -169,7 +176,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("No friend with such friend id");
             }
 
-            if ((friend.Reciever?.ID == loggedInUserId || friend.Sender?.ID == loggedInUserId))
+            if (!(friend.Receiver?.ID == loggedInUserId || friend.Sender?.ID == loggedInUserId))
             {
                 return NotFound("You have no such friend :C");
             }

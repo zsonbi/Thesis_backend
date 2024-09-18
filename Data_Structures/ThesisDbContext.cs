@@ -46,6 +46,9 @@ namespace Thesis_backend.Data_Structures
 
                 entity.HasIndex(u => u.Email)
                       .IsUnique();
+                // Combined unique index on both fields
+                entity.HasIndex(u => new { u.Username, u.Email })
+                      .IsUnique();
             });
 
             modelBuilder.Entity<Task>(entity =>
@@ -65,9 +68,23 @@ namespace Thesis_backend.Data_Structures
 
             modelBuilder.Entity<Friend>(entity =>
             {
-                entity.HasKey(e => e.ID);
-                entity.HasOne<User>(u => u.Sender);
-                entity.HasOne<User>(u => u.Reciever);
+                // Configure Sender relationship
+                entity.HasOne(f => f.Sender)
+                      .WithMany()  // Assuming no collection on the User side
+                      .HasForeignKey("SenderId")
+                      .OnDelete(DeleteBehavior.Restrict); // No cascading delete
+
+                // Configure Receiver relationship
+                entity.HasOne(f => f.Receiver)
+                      .WithMany()  // Assuming no collection on the User side
+                      .HasForeignKey("ReceiverId")
+                      .OnDelete(DeleteBehavior.Restrict); // No cascading delete
+
+                // Unique index on SenderId
+                entity.HasIndex("SenderId").IsUnique(true);
+
+                // Unique index on ReceiverId
+                entity.HasIndex("ReceiverId").IsUnique(true);
             });
         }
 
