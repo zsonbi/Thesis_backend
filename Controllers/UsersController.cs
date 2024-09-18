@@ -42,14 +42,12 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("Not logged in");
             }
-            //User? loggedInUser = await Get<User>(Convert.ToInt64(storedUserId));
-            //if (loggedInUser is null)
-            //{
-            //    return NotFound("Not logged in");
-            //}
-            //return Ok(loggedInUser.Serialize);
-
-            return OkOrNotFound<User>(await Get<User>(Convert.ToInt64(storedUserId)));
+            User? loggedInUser = await Get<User>(Convert.ToInt64(storedUserId));
+            if (loggedInUser is null)
+            {
+                return NotFound("Not logged in");
+            }
+            return Ok(loggedInUser.Serialize);
         }
 
         [HttpDelete("Logout")]
