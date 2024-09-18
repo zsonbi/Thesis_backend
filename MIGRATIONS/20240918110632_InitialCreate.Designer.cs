@@ -12,8 +12,8 @@ using Thesis_backend.Data_Structures;
 namespace Thesis_backend.Migrations
 {
     [DbContext(typeof(ThesisDbContext))]
-    [Migration("20240720215257_userSettingsConstraint")]
-    partial class userSettingsConstraint
+    [Migration("20240918110632_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,36 @@ namespace Thesis_backend.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Friend", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<bool>("Pending")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<long>("ReceiverId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SenderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("SentTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId", "ReceiverId")
+                        .IsUnique();
+
+                    b.ToTable("FriendsTable");
+                });
+
             modelBuilder.Entity("Thesis_backend.Data_Structures.Game", b =>
                 {
                     b.Property<long>("ID")
@@ -33,8 +63,8 @@ namespace Thesis_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<DateTime>("Currency")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long>("Currency")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("CurrentXP")
                         .HasColumnType("bigint");
@@ -58,11 +88,11 @@ namespace Thesis_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<DateTime>("Added")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<bool>("Completed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("LastCompleted")
                         .HasColumnType("datetime(6)");
@@ -80,6 +110,9 @@ namespace Thesis_backend.Migrations
                     b.Property<bool>("TaskType")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<DateTime>("Updated")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("ID");
 
                     b.HasIndex("TaskOwnerID");
@@ -94,6 +127,9 @@ namespace Thesis_backend.Migrations
                         .HasColumnType("bigint");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<long>("Currency")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -112,6 +148,9 @@ namespace Thesis_backend.Migrations
                     b.Property<DateTime>("Registered")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<long>("TotalScore")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -122,6 +161,9 @@ namespace Thesis_backend.Migrations
                         .IsUnique();
 
                     b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.HasIndex("Username", "Email")
                         .IsUnique();
 
                     b.ToTable("UsersTable");
@@ -150,6 +192,25 @@ namespace Thesis_backend.Migrations
                         .IsUnique();
 
                     b.ToTable("UserSettingsTable");
+                });
+
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Friend", b =>
+                {
+                    b.HasOne("Thesis_backend.Data_Structures.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Thesis_backend.Data_Structures.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.Task", b =>
