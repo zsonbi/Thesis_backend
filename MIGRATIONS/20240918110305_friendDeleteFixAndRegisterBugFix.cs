@@ -11,15 +11,11 @@ namespace Thesis_backend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_FriendsTable_UsersTable_RecieverID",
+                name: "FK_FriendsTable_UsersTable_ReceiverID",
                 table: "FriendsTable");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_FriendsTable_UsersTable_SenderID",
-                table: "FriendsTable");
-
-            migrationBuilder.DropIndex(
-                name: "IX_FriendsTable_RecieverID",
                 table: "FriendsTable");
 
             migrationBuilder.DropIndex(
@@ -32,26 +28,19 @@ namespace Thesis_backend.Migrations
                 newName: "SenderId");
 
             migrationBuilder.RenameColumn(
-                name: "RecieverID",
+                name: "ReceiverID",
                 table: "FriendsTable",
                 newName: "ReceiverId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UsersTable_Username_Email",
-                table: "UsersTable",
-                columns: new[] { "Username", "Email" },
-                unique: true);
+            migrationBuilder.RenameIndex(
+                name: "IX_FriendsTable_ReceiverID",
+                table: "FriendsTable",
+                newName: "IX_FriendsTable_ReceiverId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FriendsTable_ReceiverId",
+                name: "IX_FriendsTable_SenderId_ReceiverId",
                 table: "FriendsTable",
-                column: "ReceiverId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FriendsTable_SenderId",
-                table: "FriendsTable",
-                column: "SenderId",
+                columns: new[] { "SenderId", "ReceiverId" },
                 unique: true);
 
             migrationBuilder.AddForeignKey(
@@ -83,15 +72,7 @@ namespace Thesis_backend.Migrations
                 table: "FriendsTable");
 
             migrationBuilder.DropIndex(
-                name: "IX_UsersTable_Username_Email",
-                table: "UsersTable");
-
-            migrationBuilder.DropIndex(
-                name: "IX_FriendsTable_ReceiverId",
-                table: "FriendsTable");
-
-            migrationBuilder.DropIndex(
-                name: "IX_FriendsTable_SenderId",
+                name: "IX_FriendsTable_SenderId_ReceiverId",
                 table: "FriendsTable");
 
             migrationBuilder.RenameColumn(
@@ -102,12 +83,12 @@ namespace Thesis_backend.Migrations
             migrationBuilder.RenameColumn(
                 name: "ReceiverId",
                 table: "FriendsTable",
-                newName: "RecieverID");
+                newName: "ReceiverID");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_FriendsTable_RecieverID",
+            migrationBuilder.RenameIndex(
+                name: "IX_FriendsTable_ReceiverId",
                 table: "FriendsTable",
-                column: "RecieverID");
+                newName: "IX_FriendsTable_ReceiverID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FriendsTable_SenderID",
@@ -115,18 +96,20 @@ namespace Thesis_backend.Migrations
                 column: "SenderID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_FriendsTable_UsersTable_RecieverID",
+                name: "FK_FriendsTable_UsersTable_ReceiverID",
                 table: "FriendsTable",
-                column: "RecieverID",
+                column: "ReceiverID",
                 principalTable: "UsersTable",
-                principalColumn: "ID");
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_FriendsTable_UsersTable_SenderID",
                 table: "FriendsTable",
                 column: "SenderID",
                 principalTable: "UsersTable",
-                principalColumn: "ID");
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

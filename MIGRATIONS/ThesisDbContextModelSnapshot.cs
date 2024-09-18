@@ -33,10 +33,10 @@ namespace Thesis_backend.Migrations
                     b.Property<bool>("Pending")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<long?>("ReceiverId")
+                    b.Property<long>("ReceiverId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("SenderId")
+                    b.Property<long>("SenderId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("SentTime")
@@ -44,10 +44,9 @@ namespace Thesis_backend.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ReceiverId")
-                        .IsUnique();
+                    b.HasIndex("ReceiverId");
 
-                    b.HasIndex("SenderId")
+                    b.HasIndex("SenderId", "ReceiverId")
                         .IsUnique();
 
                     b.ToTable("FriendsTable");
@@ -197,12 +196,14 @@ namespace Thesis_backend.Migrations
                     b.HasOne("Thesis_backend.Data_Structures.User", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Thesis_backend.Data_Structures.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Receiver");
 

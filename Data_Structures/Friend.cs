@@ -1,10 +1,15 @@
-﻿using System.Text.Json.Serialization;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace Thesis_backend.Data_Structures
 {
     public record Friend : DbElement
     {
+        public long SenderId { get; set; }
+
         public User? Sender { get; set; }
+
+        public long ReceiverId { get; set; }
         public User? Receiver { get; set; }
 
         public DateTime SentTime { get; set; } = DateTime.UtcNow;

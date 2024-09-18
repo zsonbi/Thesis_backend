@@ -68,23 +68,26 @@ namespace Thesis_backend.Data_Structures
 
             modelBuilder.Entity<Friend>(entity =>
             {
-                // Configure Sender relationship
+                //// Configure Sender relationship
+                //entity.HasOne(f => f.Sender)
+                //      .WithMany().IsRequired(); // Assuming no collection on the User side
+
+                //// Configure Receiver relationship
+                //entity.HasOne(f => f.Receiver)
+                //      .WithMany().IsRequired(); // Assuming no collection on the User side
+
                 entity.HasOne(f => f.Sender)
-                      .WithMany()  // Assuming no collection on the User side
-                      .HasForeignKey("SenderId")
-                      .OnDelete(DeleteBehavior.Restrict); // No cascading delete
+                .WithMany() // Assuming a user can send many friends but no inverse navigation property in User
+                .HasForeignKey(f => f.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                // Configure Receiver relationship
                 entity.HasOne(f => f.Receiver)
-                      .WithMany()  // Assuming no collection on the User side
-                      .HasForeignKey("ReceiverId")
-                      .OnDelete(DeleteBehavior.Restrict); // No cascading delete
+                        .WithMany() // Assuming a user can receive many friends but no inverse navigation property in User
+                        .HasForeignKey(f => f.ReceiverId)
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                // Unique index on SenderId
-                entity.HasIndex("SenderId").IsUnique(true);
-
-                // Unique index on ReceiverId
-                entity.HasIndex("ReceiverId").IsUnique(true);
+                entity.HasIndex(f => new { f.SenderId, f.ReceiverId })
+                    .IsUnique();
             });
         }
 
