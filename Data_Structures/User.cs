@@ -19,6 +19,6 @@ namespace Thesis_backend.Data_Structures
         public long Currency { get; set; }
 
         [JsonIgnore]
-        public override object Serialize => new { Username, PasswordHash, Email, UserSettings?.Serialize, GameId, LastLoggedIn, Registered, UserTasks, TotalScore, Currency };
+        public override object Serialize => new { ID, Username, PasswordHash, Email, UserSettings?.Serialize, GameId, LastLoggedIn, Registered, UserTasks, TotalScore, Currency };
     }
 }
