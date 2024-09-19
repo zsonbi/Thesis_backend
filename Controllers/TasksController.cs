@@ -117,8 +117,16 @@ namespace Thesis_backend.Controllers
             task.LastCompleted = DateTime.UtcNow;
 
             bool taskUpdateResult = await Update<Data_Structures.Task>(task);
-            task.TaskOwner.TotalScore += DetermineTaskScore(task.PeriodRate);
-            task.TaskOwner.Currency += DetermineTaskScore(task.PeriodRate);
+            if (task.TaskType)
+            {
+                task.TaskOwner.TotalScore += DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.Currency += DetermineTaskScore(task.PeriodRate);
+            }
+            else
+            {
+                task.TaskOwner.TotalScore -= DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.Currency -= DetermineTaskScore(task.PeriodRate);
+            }
             bool userScoreUpdate = await Update<Data_Structures.User>(task.TaskOwner);
 
             if (taskUpdateResult && userScoreUpdate)
