@@ -126,15 +126,25 @@ namespace Thesis_backend.Controllers
             }
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
+            long convertedID;
 
+            if (!long.TryParse(ID, out convertedID))
+            {
+                return NotFound("Incorrect ID format");
+            }
             var friend = await Database.Friends.All
             .Include(r => r.Receiver)
             .Include(s => s.Sender)
-            .SingleOrDefaultAsync(x => x.Receiver!.ID == loggedInUserId);
+            .SingleOrDefaultAsync(x => x.ID == convertedID);
 
             if (friend is null)
             {
-                return NotFound("No friend with releated user identification");
+                return NotFound("No friend with releated id");
+            }
+
+            if (friend.Receiver!.ID != loggedInUserId)
+            {
+                return NotFound("You can't accept this friend request you are not the reciever");
             }
 
             if (!friend.Pending)
