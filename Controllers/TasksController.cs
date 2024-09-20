@@ -52,7 +52,6 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("No user is logged in");
             }
-
             return Ok(user.UserTasks?.Select(x => x.Serialize));
         }
 

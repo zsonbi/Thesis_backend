@@ -110,7 +110,7 @@ namespace Thesis_backend.Controllers
 
             HttpContext.Session.SetString("UserId", newUser.ID.ToString());
 
-            return Created();
+            return CreatedAtAction(nameof(GetLoggedInUser), newUser.Serialize);
         }
     }
 }
