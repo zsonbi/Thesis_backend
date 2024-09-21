@@ -15,6 +15,7 @@ namespace Thesis_backend.Data_Structures
         public DbSet<OwnedCar> OwnedCarsTable { get; set; }
 
         public DataTable<User> Users { get; set; }
+        public DataTable<User> Games { get; set; }
         public DataTable<PlayerTask> Tasks { get; set; }
         public DataTable<Friend> Friends { get; set; }
         public DataTable<UserSettings> UserSettings { get; set; }
@@ -178,7 +179,7 @@ namespace Thesis_backend.Data_Structures
             if (typeof(T) == typeof(Friend)) return (IDataTable<T>)Friends;
             if (typeof(T) == typeof(Shop)) return (IDataTable<T>)Shop;
             if (typeof(T) == typeof(OwnedCar)) return (IDataTable<T>)OwnedCars;
-            if (typeof(T) == typeof(Game)) return (IDataTable<T>)GamesTable;
+            if (typeof(T) == typeof(Game)) return (IDataTable<T>)Games;
 
             throw new KeyNotFoundException("No such table is in the db");
         }
