@@ -178,6 +178,7 @@ namespace Thesis_backend.Data_Structures
             if (typeof(T) == typeof(Friend)) return (IDataTable<T>)Friends;
             if (typeof(T) == typeof(Shop)) return (IDataTable<T>)Shop;
             if (typeof(T) == typeof(OwnedCar)) return (IDataTable<T>)OwnedCars;
+            if (typeof(T) == typeof(Game)) return (IDataTable<T>)GamesTable;
 
             throw new KeyNotFoundException("No such table is in the db");
         }

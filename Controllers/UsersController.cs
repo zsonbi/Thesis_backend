@@ -112,6 +112,9 @@ namespace Thesis_backend.Controllers
                 return Conflict("Already exists such Game for this user");
             }
 
+            newUser.Game = game;
+            newUser.UserSettings = userSettings;
+
             HttpContext.Session.SetString("UserId", newUser.ID.ToString());
 
             return CreatedAtAction(nameof(GetLoggedInUser), newUser.Serialize);
