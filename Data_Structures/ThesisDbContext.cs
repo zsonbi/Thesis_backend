@@ -15,7 +15,7 @@ namespace Thesis_backend.Data_Structures
         public DbSet<OwnedCar> OwnedCarsTable { get; set; }
 
         public DataTable<User> Users { get; set; }
-        public DataTable<User> Games { get; set; }
+        public DataTable<Game> Games { get; set; }
         public DataTable<PlayerTask> Tasks { get; set; }
         public DataTable<Friend> Friends { get; set; }
         public DataTable<UserSettings> UserSettings { get; set; }
@@ -31,6 +31,7 @@ namespace Thesis_backend.Data_Structures
             Friends = new DataTable<Friend>(this, FriendsTable!);
             Shop = new DataTable<Shop>(this, ShopTable!);
             OwnedCars = new DataTable<OwnedCar>(this, OwnedCarsTable!);
+            Games = new DataTable<Game>(this, GamesTable!);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

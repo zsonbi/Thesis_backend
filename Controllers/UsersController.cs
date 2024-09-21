@@ -65,7 +65,7 @@ namespace Thesis_backend.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
-            User? user = await Database.Users.All.Include(u => u.UserSettings).SingleOrDefaultAsync(x => x.Username == request.UserIdentification || x.Email == request.UserIdentification);
+            User? user = await Database.Users.All.Include(u => u.UserSettings).Include(g=>g.Game).SingleOrDefaultAsync(x => x.Username == request.UserIdentification || x.Email == request.UserIdentification);
             if (user == null)
             {
                 return NotFound("Can't find user with this email or password");
