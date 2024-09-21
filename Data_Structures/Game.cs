@@ -14,6 +14,6 @@ namespace Thesis_backend.Data_Structures
         public long Currency { get; set; }
         public List<OwnedCar>? OwnedCars { get; set; }
 
-        public override object Serialize => new { ID, Lvl, CurrentXP, NextLVLXP, UserId, Currency, OwnedCars };
+        public override object Serialize => new { ID, Lvl, CurrentXP, NextLVLXP, UserId, Currency, OwnedCars = OwnedCars?.Select(car => car.Serialize).ToList() };
     }
 }
