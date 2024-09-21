@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis_backend.Data_Structures;
 
@@ -11,9 +12,11 @@ using Thesis_backend.Data_Structures;
 namespace Thesis_backend.Migrations
 {
     [DbContext(typeof(ThesisDbContext))]
-    partial class ThesisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240921103020_shop_added")]
+    partial class shop_added
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,30 +86,6 @@ namespace Thesis_backend.Migrations
                     b.ToTable("GamesTable");
                 });
 
-            modelBuilder.Entity("Thesis_backend.Data_Structures.OwnedCar", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
-
-                    b.Property<long>("GameId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ShopId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ShopId");
-
-                    b.HasIndex("GameId", "ShopId")
-                        .IsUnique();
-
-                    b.ToTable("OwnedCarsTable");
-                });
-
             modelBuilder.Entity("Thesis_backend.Data_Structures.PlayerTask", b =>
                 {
                     b.Property<long>("ID")
@@ -161,21 +140,17 @@ namespace Thesis_backend.Migrations
                     b.Property<int>("Cost")
                         .HasColumnType("int");
 
+                    b.Property<long?>("GameID")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("ProductName")
                         .HasColumnType("longtext");
 
                     b.HasKey("ID");
 
-                    b.ToTable("ShopTable");
+                    b.HasIndex("GameID");
 
-                    b.HasData(
-                        new
-                        {
-                            ID = 1L,
-                            CarType = 0,
-                            Cost = 0,
-                            ProductName = "Base_car"
-                        });
+                    b.ToTable("ShopTable");
                 });
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.User", b =>
@@ -279,25 +254,6 @@ namespace Thesis_backend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Thesis_backend.Data_Structures.OwnedCar", b =>
-                {
-                    b.HasOne("Thesis_backend.Data_Structures.Game", "Game")
-                        .WithMany("OwnedCars")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Thesis_backend.Data_Structures.Shop", "Shop")
-                        .WithMany()
-                        .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("Shop");
-                });
-
             modelBuilder.Entity("Thesis_backend.Data_Structures.PlayerTask", b =>
                 {
                     b.HasOne("Thesis_backend.Data_Structures.User", "TaskOwner")
@@ -307,6 +263,13 @@ namespace Thesis_backend.Migrations
                         .IsRequired();
 
                     b.Navigation("TaskOwner");
+                });
+
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Shop", b =>
+                {
+                    b.HasOne("Thesis_backend.Data_Structures.Game", null)
+                        .WithMany("OwnedCars")
+                        .HasForeignKey("GameID");
                 });
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.UserSettings", b =>

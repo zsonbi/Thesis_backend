@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Thesis_backend.Data_Structures
 {
-    public record Task : DbElement
+    public record PlayerTask : DbElement
     {
         public required User TaskOwner { get; set; }
         public required string TaskName { get; set; }

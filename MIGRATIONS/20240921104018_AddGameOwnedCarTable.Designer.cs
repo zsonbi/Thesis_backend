@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis_backend.Data_Structures;
 
@@ -11,9 +12,11 @@ using Thesis_backend.Data_Structures;
 namespace Thesis_backend.Migrations
 {
     [DbContext(typeof(ThesisDbContext))]
-    partial class ThesisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240921104018_AddGameOwnedCarTable")]
+    partial class AddGameOwnedCarTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,15 +170,6 @@ namespace Thesis_backend.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("ShopTable");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = 1L,
-                            CarType = 0,
-                            Cost = 0,
-                            ProductName = "Base_car"
-                        });
                 });
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.User", b =>

@@ -35,7 +35,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("Incorrect ID format");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(u => u.TaskOwner).SingleOrDefaultAsync(x => x.ID == convertedID && x.TaskOwner.ID == GetLoggedInUser());
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(u => u.TaskOwner).SingleOrDefaultAsync(x => x.ID == convertedID && x.TaskOwner.ID == GetLoggedInUser());
             if (task is null)
             {
                 return NotFound("No task with the following id");
@@ -65,7 +65,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("No user is logged in");
             }
 
-            Data_Structures.Task taskToSave = new Data_Structures.Task()
+            Data_Structures.PlayerTask taskToSave = new Data_Structures.PlayerTask()
             {
                 TaskName = request.TaskName,
                 Description = request.Description,
@@ -76,7 +76,7 @@ namespace Thesis_backend.Controllers
                 PeriodRate = request.PeriodRate,
             };
 
-            Data_Structures.Task? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType);
+            Data_Structures.PlayerTask? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType);
 
             if (existingTask is null)
             {
@@ -101,7 +101,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID);
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID);
             if (task is null)
             {
                 return NotFound("No task found with this Id");
@@ -115,7 +115,7 @@ namespace Thesis_backend.Controllers
             task.Completed = true;
             task.LastCompleted = DateTime.UtcNow;
 
-            bool taskUpdateResult = await Update<Data_Structures.Task>(task);
+            bool taskUpdateResult = await Update<Data_Structures.PlayerTask>(task);
             if (task.TaskType)
             {
                 task.TaskOwner.TotalScore -= DetermineTaskScore(task.PeriodRate);
@@ -147,7 +147,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
             if (task is null)
             {
                 return NotFound("No task found with this Id");
@@ -157,7 +157,7 @@ namespace Thesis_backend.Controllers
             task.TaskType = request.TaskType;
             task.Description = request.Description;
 
-            if (await Update<Data_Structures.Task>(task))
+            if (await Update<Data_Structures.PlayerTask>(task))
             {
                 return Ok(task.Serialize);
             }
@@ -176,13 +176,13 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
             if (task is null)
             {
                 return NotFound("No task found with this Id");
             }
 
-            if (await Delete<Data_Structures.Task>(task))
+            if (await Delete<Data_Structures.PlayerTask>(task))
             {
                 return Ok("Deleted");
             }
