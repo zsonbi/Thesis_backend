@@ -117,6 +117,13 @@ namespace Thesis_backend.Controllers
             newUser.Game = game;
             newUser.UserSettings = userSettings;
 
+            //Add the default owned car
+            game.OwnedCars.Add(new OwnedCar { GameId = game.ID, ShopId = 1 });
+            if (!await Update(game))
+            {
+                return BadRequest("Couldn't add the base car to the player");
+            }
+
             HttpContext.Session.SetString("UserId", newUser.ID.ToString());
 
             return CreatedAtAction(nameof(GetLoggedInUser), newUser.Serialize);
