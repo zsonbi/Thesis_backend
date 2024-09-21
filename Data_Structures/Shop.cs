@@ -8,7 +8,9 @@ namespace Thesis_backend.Data_Structures
         public int Cost { get; set; }
         public CarType CarType { get; set; }
 
+        public bool Buyable { get; set; } = false;
+
         [JsonIgnore]
-        public override object Serialize => new { ID, ProductName, Cost, CarType };
+        public override object Serialize => new { ID, ProductName, Cost, CarType, Buyable };
     }
 }

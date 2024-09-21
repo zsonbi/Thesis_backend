@@ -94,18 +94,18 @@ namespace Thesis_backend.Data_Structures
             modelBuilder.Entity<Game>(entity =>
             {
                 entity.HasMany(g => g.OwnedCars)
-                      .WithOne(goc => goc.Game)
-                      .HasForeignKey(goc => goc.GameId);
+                      .WithOne(o => o.Game)
+                      .HasForeignKey(o => o.GameId);
             });
 
             modelBuilder.Entity<Shop>(entity =>
             {
                 entity.HasMany<OwnedCar>()
-                      .WithOne(goc => goc.Shop)
-                      .HasForeignKey(goc => goc.ShopId);
+                      .WithOne(o => o.Shop)
+                      .HasForeignKey(o => o.ShopId);
 
                 entity.HasData(
-                    new Shop() { ID = 1, CarType = CarType.Common, Cost = 0, ProductName = "Base_car" }
+                    new Shop() { ID = 1, CarType = CarType.Common, Cost = 0, ProductName = "Base car", Buyable = false }
                     );
             });
 
