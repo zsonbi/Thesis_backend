@@ -119,6 +119,11 @@ namespace Thesis_backend.Controllers
 
             //Add the default owned car
             game.OwnedCars.Add(new OwnedCar { GameId = game.ID, ShopId = 1 });
+            if (!await Create(game.OwnedCars[0]))
+            {
+                return BadRequest("Couldn't create the ownedCar record");
+            }
+
             if (!await Update(game))
             {
                 return BadRequest("Couldn't add the base car to the player");
