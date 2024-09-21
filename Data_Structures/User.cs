@@ -10,7 +10,7 @@ namespace Thesis_backend.Data_Structures
         public string PasswordHash { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public UserSettings? UserSettings { get; set; }
-        public Game Game { get; set; }
+        public Game? Game { get; set; }
         public DateTime LastLoggedIn { get; set; }
         public DateTime Registered { get; set; }
         public List<PlayerTask>? UserTasks { get; set; }
@@ -19,6 +19,6 @@ namespace Thesis_backend.Data_Structures
         public long Currency { get; set; }
 
         [JsonIgnore]
-        public override object Serialize => new { ID, Username, PasswordHash, Email, userSettings = UserSettings?.Serialize, game = Game.Serialize, LastLoggedIn, Registered, UserTasks, TotalScore, Currency };
+        public override object Serialize => new { ID, Username, PasswordHash, Email, userSettings = UserSettings?.Serialize, game = Game?.Serialize, LastLoggedIn, Registered, UserTasks, TotalScore, Currency };
     }
 }

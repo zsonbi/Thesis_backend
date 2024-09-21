@@ -106,7 +106,11 @@ namespace Thesis_backend.Controllers
                 return Conflict("Already exists such UserSettings for this user");
             }
 
-            //TODO add gameID
+            Game game = new Game() { Lvl = 0, NextLVLXP = 50, Currency = 0, User = newUser, UserId = newUser.ID, CurrentXP = 0, OwnedCars = new List<OwnedCar>() };
+            if (!await Create(game))
+            {
+                return Conflict("Already exists such Game for this user");
+            }
 
             HttpContext.Session.SetString("UserId", newUser.ID.ToString());
 
