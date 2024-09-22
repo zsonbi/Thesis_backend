@@ -105,7 +105,8 @@ namespace Thesis_backend.Data_Structures
                       .HasForeignKey(o => o.ShopId);
 
                 entity.HasData(
-                    new Shop() { ID = 1, CarType = CarType.Common, Cost = 0, ProductName = "Base car", Buyable = false }
+                    new Shop() { ID = 1, CarType = CarType.Common, Cost = 0, ProductName = "Base car", Buyable = false },
+                    new Shop() { ID = 2, CarType = CarType.Rare, Cost = 50, ProductName = "Sport white car", Buyable = true }
                     );
             });
 
