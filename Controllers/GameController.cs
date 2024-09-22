@@ -17,8 +17,8 @@ namespace Thesis_backend.Controllers
             _logger = logger;
         }
 
-        [HttpPatch("DoubleCoinForGame")]
-        public async Task<IActionResult> DoubleCoinForGame()
+        [HttpPatch("DoubleCoinsForGame")]
+        public async Task<IActionResult> DoubleCoinsForGame()
         {
             if (!CheckUserLoggedIn())
             {
