@@ -46,7 +46,7 @@ namespace Thesis_backend.Controllers
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
-            var game = await Database.Games.All.Include(r => r.User).SingleOrDefaultAsync(x => x.UserId == loggedInUserId);
+            var game = await Database.Games.All.Include(r => r.User).Include(o => o.OwnedCars).SingleOrDefaultAsync(x => x.UserId == loggedInUserId);
             if (game is null)
             {
                 return NotFound("No game for the user");
