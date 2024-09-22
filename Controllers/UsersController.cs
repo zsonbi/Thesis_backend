@@ -92,7 +92,7 @@ namespace Thesis_backend.Controllers
                 LastLoggedIn = DateTime.UtcNow,
                 Registered = DateTime.UtcNow,
                 PasswordHash = Crypto.HashPassword(request.Password),
-                Currency = 0,
+                CurrentTaskScore = 0,
                 TotalScore = 0,
             };
 

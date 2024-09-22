@@ -1,100 +1,53 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Thesis_backend.Data_Structures;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using System.Security.Cryptography;
-using Thesis;
 using Microsoft.AspNetCore.Cors;
-using Castle.Core.Smtp;
 
 namespace Thesis_backend.Controllers
 {
     [EnableCors]
     [ApiController]
     [Route("api/[controller]")]
-    public class GameConroller : ThesisControllerBase
+    public class GameController : ThesisControllerBase
     {
-        private readonly ILogger<GameConroller> _logger;
+        private readonly ILogger<GameController> _logger;
 
-        public GameConroller(ThesisDbContext database, ILogger<GameConroller> logger) : base(database)
+        public GameController(ThesisDbContext database, ILogger<GameController> logger) : base(database)
         {
             _logger = logger;
         }
 
-        [HttpPost("Send")]
-        public async Task<IActionResult> SendFriendRequest([FromBody] string UserIdentification)
-        {
-            string? storedUserId = HttpContext.Session.GetString("UserId");
-            if (storedUserId is null)
-            {
-                return NotFound("Not logged in");
-            }
-
-            User? reciever = await Database.Users.All.Include(u => u.UserSettings).SingleOrDefaultAsync(x => x.Username == UserIdentification || x.Email == UserIdentification);
-
-            if (reciever is null)
-            {
-                return NotFound("No such user exist");
-            }
-            if (storedUserId == reciever.ID.ToString())
-            {
-                return Conflict("Can't send friend request to yourself");
-            }
-
-            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Receiver).Include(s => s.Sender).SingleOrDefaultAsync(x => x.Receiver!.ID == GetLoggedInUser() && x.Sender!.ID == reciever.ID);
-
-            if (friend is not null)
-            {
-                return Conflict($"You can't send an another friend request to {reciever.Username}");
-            }
-
-            Friend newFriend = new Friend()
-            {
-                Pending = true,
-                Receiver = reciever,
-                Sender = Database.Users.Get(Convert.ToInt64(storedUserId)).Result,
-                SentTime = DateTime.UtcNow,
-            };
-
-            if (!await Create(newFriend))
-            {
-                return Conflict("Can't send friend request to him");
-            }
-
-            return CreatedAtAction(nameof(GetFriend), new { id = newFriend.ID }, newFriend.Serialize);
-        }
-
-        [HttpGet("{ID}/Get")]
-        public async Task<IActionResult> GetFriendByID(string ID)
+        [HttpPatch("DoubleCoinForGame")]
+        public async Task<IActionResult> DoubleCoinForGame()
         {
             if (!CheckUserLoggedIn())
             {
                 return NotFound("Not logged in");
             }
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
-            long convertedID;
-            if (!long.TryParse(ID, out convertedID))
+            var game = await Database.Games.All.Include(r => r.User).SingleOrDefaultAsync(x => x.UserId == loggedInUserId);
+            if (game is null)
             {
-                return NotFound("Incorrect ID format");
+                return NotFound("No game for the user");
             }
 
-            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Receiver).Include(s => s.Sender).SingleOrDefaultAsync(x => x.ID == convertedID);
-
-            if (friend is null)
+            if (game.User.CurrentTaskScore < Config.DOUBLE_COIN_TASK_POINT_COST)
             {
-                return NotFound("No friend with the following id");
+                return BadRequest("Not enough task points");
             }
-            if (!(friend.Sender!.ID == GetLoggedInUser() || friend.Receiver!.ID == GetLoggedInUser()))
+            game.User.CurrentTaskScore -= Config.DOUBLE_COIN_TASK_POINT_COST;
+
+            if (!(await Update(game.User)))
             {
-                return BadRequest("Not releated to you");
+                return BadRequest("Can't update the user's remaining task points");
             }
 
-            return Ok(friend.Serialize);
+            return Ok(game.User.Serialize);
         }
 
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetFriend()
+        [HttpGet("GetAllOwnedCars")]
+        public async Task<IActionResult> GetAllOwnedCars()
         {
             if (!CheckUserLoggedIn())
             {
@@ -103,22 +56,19 @@ namespace Thesis_backend.Controllers
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
-            var friends = await Database.Friends.All
-            .Include(r => r.Receiver)
-            .Include(s => s.Sender)
-            .Where(x => x.Sender!.ID == loggedInUserId || x.Receiver!.ID == loggedInUserId)
-            .ToArrayAsync();
+            var game = await Database.Games.All
+            .Include(r => r.User).SingleOrDefaultAsync(x => x.UserId == loggedInUserId);
 
-            if (friends is null)
+            if (game is null)
             {
                 return NotFound("No friend with releated user identification");
             }
 
-            return Ok(friends.Select(x => x.Serialize));
+            return Ok(game.OwnedCars?.Select(x => x.Serialize));
         }
 
-        [HttpPatch("{ID}/Accept")]
-        public async Task<IActionResult> AcceptFriendRequest(string ID)
+        [HttpPatch("AddCoin")]
+        public async Task<IActionResult> AddCoin([FromBody] int amount)
         {
             if (!CheckUserLoggedIn())
             {
@@ -126,77 +76,20 @@ namespace Thesis_backend.Controllers
             }
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
-            long convertedID;
 
-            if (!long.TryParse(ID, out convertedID))
+            var game = await Database.Games.All.Include(r => r.User).SingleOrDefaultAsync(x => x.UserId == loggedInUserId);
+
+            if (game is null)
             {
-                return NotFound("Incorrect ID format");
+                return NotFound("No game for the user");
             }
-            var friend = await Database.Friends.All
-            .Include(r => r.Receiver)
-            .Include(s => s.Sender)
-            .SingleOrDefaultAsync(x => x.ID == convertedID);
+            game.Currency += amount;
 
-            if (friend is null)
+            if (!await Update(game))
             {
-                return NotFound("No friend with releated id");
+                return BadRequest("Can't update the game's currency");
             }
-
-            if (friend.Receiver!.ID != loggedInUserId)
-            {
-                return NotFound("You can't accept this friend request you are not the reciever");
-            }
-
-            if (!friend.Pending)
-            {
-                return BadRequest("Already accepted");
-            }
-
-            friend.Pending = false;
-            if (!await Update(friend))
-            {
-                return BadRequest("Can't update the friend request");
-            }
-            return Ok(friend);
-        }
-
-        [HttpDelete("{ID}/Delete")]
-        public async Task<IActionResult> DeleteFriend(string ID)
-        {
-            if (!CheckUserLoggedIn())
-            {
-                return NotFound("Not logged in");
-            }
-
-            long loggedInUserId = (long)(this.GetLoggedInUser()!);
-            long convertedID;
-
-            if (!long.TryParse(ID, out convertedID))
-            {
-                return NotFound("Incorrect ID format");
-            }
-
-            var friend = await Database.Friends.All
-            .Include(r => r.Receiver)
-            .Include(s => s.Sender)
-            .SingleOrDefaultAsync(x => x.ID == convertedID);
-
-            if (friend is null)
-            {
-                return NotFound("No friend with such friend id");
-            }
-
-            if (!(friend.Receiver?.ID == loggedInUserId || friend.Sender?.ID == loggedInUserId))
-            {
-                return NotFound("You have no such friend :C");
-            }
-            bool pending = friend.Pending;
-            if (!await Delete(friend))
-            {
-                return BadRequest("Can't reject the friend request");
-            }
-
-            return Ok("Deleted");
+            return Ok(game);
         }
     }
 }
