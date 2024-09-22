@@ -69,7 +69,7 @@ namespace Thesis_backend.Controllers
                 return BadRequest("Can't update the game's currency");
             }
 
-            return Ok(game);
+            return Ok(game.Serialize);
         }
     }
 }
