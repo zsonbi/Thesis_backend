@@ -35,7 +35,7 @@ namespace Thesis_backend.Controllers
         }
 
         [HttpGet("LoggedInUser")]
-        public async Task<IActionResult> GetLoggedInUser()
+        public new async Task<IActionResult> GetLoggedInUser()
         {
             string? storedUserId = HttpContext.Session.GetString("UserId");
             if (storedUserId is null)
@@ -43,7 +43,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            User? loggedInUser = await Database.Users.All.Include(u => u.UserSettings).Include(g => g.Game).SingleOrDefaultAsync(x => x.ID == Convert.ToInt64(storedUserId));
+            User? loggedInUser = await Database.Users.All.Include(u => u.UserSettings).Include(g => g.Game).Include(o => o.Game!.OwnedCars).SingleOrDefaultAsync(x => x.ID == Convert.ToInt64(storedUserId));
 
             if (loggedInUser is null)
             {
