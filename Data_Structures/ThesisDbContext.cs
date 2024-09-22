@@ -106,7 +106,11 @@ namespace Thesis_backend.Data_Structures
 
                 entity.HasData(
                     new Shop() { ID = 1, CarType = CarType.Common, Cost = 0, ProductName = "Base car", Buyable = false },
-                    new Shop() { ID = 2, CarType = CarType.Rare, Cost = 50, ProductName = "Sport white car", Buyable = true }
+                    new Shop() { ID = 2, CarType = CarType.Rare, Cost = 50, ProductName = "Sport white car", Buyable = true },
+                    new Shop() { ID = 3, CarType = CarType.Epic, Cost = 125, ProductName = "Ferrari", Buyable = true },
+                    new Shop() { ID = 4, CarType = CarType.Legendary, Cost = 400, ProductName = "Lamborghini", Buyable = true },
+                    new Shop() { ID = 5, CarType = CarType.Rare, Cost = 75, ProductName = "Jeep", Buyable = true },
+                    new Shop() { ID = 6, CarType = CarType.Legendary, Cost = 250, ProductName = "Rover", Buyable = true }
                     );
             });
 
