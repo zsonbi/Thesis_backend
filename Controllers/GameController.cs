@@ -91,5 +91,64 @@ namespace Thesis_backend.Controllers
             }
             return Ok(game.Serialize);
         }
+
+        [HttpPatch("PowerUp/Turbo")]
+        public async Task<IActionResult> BuyTurbo()
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+            User? loggedInUser = await Database.Users.All.SingleOrDefaultAsync(x => x.ID == loggedInUserId);
+
+            if(loggedInUser is null)
+            {
+                return NotFound("Can't find logged in user");
+            }
+            if(loggedInUser.CurrentTaskScore < Config.TURBO_TASK_POINT_COST)
+            {
+                return BadRequest("Not enough task points to buy turbo");
+            }
+            loggedInUser.CurrentTaskScore-=Config.TURBO_TASK_POINT_COST;
+
+            if (!await Update(loggedInUser)){
+                return BadRequest("Couldn't update the user");
+            }
+
+            return Ok(loggedInUser.Serialize);
+        }
+
+
+        [HttpPatch("PowerUp/Turbo")]
+        public async Task<IActionResult> BuyInvincibility()
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+            User? loggedInUser = await Database.Users.All.SingleOrDefaultAsync(x => x.ID == loggedInUserId);
+
+            if (loggedInUser is null)
+            {
+                return NotFound("Can't find logged in user");
+            }
+            if (loggedInUser.CurrentTaskScore < Config.INVINCIBILITY_TASK_POINT_COST)
+            {
+                return BadRequest("Not enough task points to buy invincibility");
+            }
+            loggedInUser.CurrentTaskScore -= Config.INVINCIBILITY_TASK_POINT_COST;
+
+            if (!await Update(loggedInUser))
+            {
+                return BadRequest("Couldn't update the user");
+            }
+
+            return Ok(loggedInUser.Serialize);
+        }
+
     }
 }
