@@ -121,7 +121,7 @@ namespace Thesis_backend.Controllers
         }
 
 
-        [HttpPatch("PowerUp/Turbo")]
+        [HttpPatch("PowerUp/Immunity")]
         public async Task<IActionResult> BuyInvincibility()
         {
             if (!CheckUserLoggedIn())
