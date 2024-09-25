@@ -120,12 +120,15 @@ namespace Thesis_backend.Controllers
             {
                 task.TaskOwner.TotalScore -= DetermineTaskScore(task.PeriodRate);
                 task.TaskOwner.CurrentTaskScore -= DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.CompletedGoodTasks--;
             }
             else
             {
                 task.TaskOwner.TotalScore += DetermineTaskScore(task.PeriodRate);
                 task.TaskOwner.CurrentTaskScore += DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.CompletedGoodTasks++;
             }
+
             bool userScoreUpdate = await Update<Data_Structures.User>(task.TaskOwner);
 
             if (taskUpdateResult && userScoreUpdate)
