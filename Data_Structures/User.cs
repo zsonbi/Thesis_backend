@@ -21,6 +21,6 @@ namespace Thesis_backend.Data_Structures
         public int CompletedBadTasks { get; set; } = 0;
 
         [JsonIgnore]
-        public override object Serialize => new { ID, Username, PasswordHash, Email, userSettings = UserSettings?.Serialize, game = Game?.Serialize, LastLoggedIn, Registered, UserTasks, TotalScore, CurrentTaskScore };
+        public override object Serialize => new { ID, Username, PasswordHash, Email, userSettings = UserSettings?.Serialize, game = Game?.Serialize, LastLoggedIn, Registered, UserTasks, TotalScore, CurrentTaskScore, CompletedGoodTasks, CompletedBadTasks };
     }
 }
