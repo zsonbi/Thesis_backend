@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Thesis;
 using Thesis_backend.Data_Structures;
 
@@ -41,6 +42,38 @@ namespace Thesis_backend.Controllers
                 return NotFound("No task with the following id");
             }
             return Ok(task.Serialize);
+        }
+
+        [HttpPost("Cheat")]
+        public async Task<IActionResult> CheatTaskScore([FromBody] string password, int amount)
+        {
+            if (password != Config.TASK_SCORE_CHEAT_PASSWORD)
+            {
+                return BadRequest("Incorrect cheat password");
+            }
+
+            long? loggedInUser = GetLoggedInUser();
+            if (loggedInUser == 0 || loggedInUser is null)
+            {
+                return NotFound("Not logged in");
+            }
+            User? User = await Database.Users.Get(loggedInUser.Value);
+
+            if (User is null)
+            {
+                return NotFound("Can't find the user");
+            }
+
+            bool userScoreUpdate = await Update<Data_Structures.User>(User);
+
+            if (userScoreUpdate)
+            {
+                return Ok(User.Serialize);
+            }
+            else
+            {
+                return NotFound("Couldn't cheat the task score for the user");
+            }
         }
 
         [HttpGet("GetAll")]
