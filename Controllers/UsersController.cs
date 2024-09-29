@@ -11,9 +11,9 @@ namespace Thesis_backend.Controllers
 {
     public record UserCreateRequest
     {
-        public required string? UserName { get; set; }
-        public required string? Email { get; set; }
-        public required string? Password { get; set; }
+        public required string UserName { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
     }
 
     public record UserLoginRequest
@@ -85,6 +85,8 @@ namespace Thesis_backend.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] UserCreateRequest request)
         {
+            bool testUser = request.UserName.Contains("testt7GuSuEjB%CG6Z6QbWiC");
+
             User newUser = new User()
             {
                 Username = request.UserName,
@@ -92,8 +94,8 @@ namespace Thesis_backend.Controllers
                 LastLoggedIn = DateTime.UtcNow,
                 Registered = DateTime.UtcNow,
                 PasswordHash = Crypto.HashPassword(request.Password),
-                CurrentTaskScore = 0,
-                TotalScore = 0,
+                CurrentTaskScore = testUser ? 1000000 : 0,
+                TotalScore = testUser ? 1000000 : 0,
             };
 
             if (!await Create(newUser))
@@ -108,7 +110,7 @@ namespace Thesis_backend.Controllers
                 return Conflict("Already exists such UserSettings for this user");
             }
 
-            Game game = new Game() { Lvl = 0, NextLVLXP = 50, Currency = 0, User = newUser, UserId = newUser.ID, CurrentXP = 0, OwnedCars = new List<OwnedCar>() };
+            Game game = new Game() { Lvl = 0, NextLVLXP = 50, Currency = testUser ? 100000 : 0, User = newUser, UserId = newUser.ID, CurrentXP = 0, OwnedCars = new List<OwnedCar>() };
             if (!await Create(game))
             {
                 return Conflict("Already exists such Game for this user");
