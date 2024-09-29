@@ -63,7 +63,7 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("Can't find the user");
             }
-
+            User.CurrentTaskScore += amount;
             bool userScoreUpdate = await Update<Data_Structures.User>(User);
 
             if (userScoreUpdate)
