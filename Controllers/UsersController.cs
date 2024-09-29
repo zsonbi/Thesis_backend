@@ -85,7 +85,7 @@ namespace Thesis_backend.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] UserCreateRequest request)
         {
-            bool testUser = request.UserName.Contains("testt7GuSuEjB%CG6Z6QbWiC");
+            bool testUser = request.UserName.Contains("testt7GuSu");
 
             User newUser = new User()
             {
