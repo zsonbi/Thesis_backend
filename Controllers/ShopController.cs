@@ -47,11 +47,14 @@ namespace Thesis_backend.Controllers
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
             var game = await Database.Games.All.Include(r => r.User).Include(o => o.OwnedCars).SingleOrDefaultAsync(x => x.UserId == loggedInUserId);
-            if (game is null)
+            if (game is null || game.OwnedCars is null)
             {
                 return NotFound("No game for the user");
             }
-
+            if (game.OwnedCars.Any(x => x.ShopId == ID))
+            {
+                return Conflict("Already bought this item before");
+            }
             if (game.Currency < shopItem.Cost)
             {
                 return BadRequest("Not enough money to buy this");
