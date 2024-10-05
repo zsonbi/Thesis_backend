@@ -55,7 +55,7 @@ namespace Thesis_backend.Controllers
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
-            List<TaskHistory> taskHistories = await Database.TaskHistories.All.Where(x => x.OwnerId == loggedInUserId).OrderByDescending(x => x.Completed).Take(Config.TASK_HISTORY_SIZE).ToListAsync();
+            List<TaskHistory> taskHistories = await Database.TaskHistories.All.Where(x => x.OwnerId == loggedInUserId).OrderByDescending(x => x.Completed.Ticks).Take(Config.TASK_HISTORY_SIZE).ToListAsync();
 
             if (taskHistories is null)
             {
