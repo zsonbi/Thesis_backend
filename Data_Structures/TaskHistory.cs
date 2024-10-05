@@ -14,6 +14,6 @@ namespace Thesis_backend.Data_Structures
 
         public DateTime Completed { get; set; }
         [JsonIgnore]
-        public override object Serialize => new { ID, Owner = OwnerId, Completed, CompletedTask.Serialize };
+        public override object Serialize => new { ID, OwnerId, Completed, CompletedTask.Serialize };
     }
 }
