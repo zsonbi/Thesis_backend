@@ -67,7 +67,7 @@ namespace Thesis_backend.Controllers
             return Ok(game.OwnedCars?.Select(x => x.Serialize));
         }
 
-        [HttpPost("StoreScore")]
+        [HttpPost("Scores/Store")]
         public async Task<IActionResult> StoreScore([FromBody] int score)
         {
             if (!CheckUserLoggedIn())
@@ -90,7 +90,7 @@ namespace Thesis_backend.Controllers
             return Ok(gameScore.Serialize);
         }
 
-        [HttpGet]
+        [HttpGet("Scores/Get")]
         public async Task<IActionResult> GetScores([FromBody] DateTime since)
         {
             if (!CheckUserLoggedIn())

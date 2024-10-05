@@ -59,7 +59,7 @@ namespace Thesis_backend.Controllers
 
             if (taskHistories is null)
             {
-                return NotFound("Can't find the task requests");
+                return NotFound("Can't find the task history");
             }
 
             return Ok(taskHistories.Select(x => x.Serialize));
