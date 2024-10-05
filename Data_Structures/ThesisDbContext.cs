@@ -138,6 +138,10 @@ namespace Thesis_backend.Data_Structures
                 entity.HasOne(u => u.Owner)
                       .WithMany()
                       .HasForeignKey(o => o.OwnerId);
+
+                entity.HasOne(t => t.CompletedTask)
+                      .WithMany()
+                      .HasForeignKey(t => t.TaskId);
             });
         }
 
