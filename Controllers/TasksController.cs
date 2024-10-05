@@ -185,7 +185,7 @@ namespace Thesis_backend.Controllers
 
             bool userScoreUpdate = await Update<Data_Structures.User>(task.TaskOwner);
 
-            TaskHistory taskHistory = new TaskHistory() { CompletedTask = task, Owner = task.TaskOwner, Completed = DateTime.UtcNow };
+            TaskHistory taskHistory = new TaskHistory() { CompletedTask = task, TaskId = task.ID, Owner = task.TaskOwner, Completed = DateTime.UtcNow };
 
             bool taskHistoryCreate = await Create(taskHistory);
 
