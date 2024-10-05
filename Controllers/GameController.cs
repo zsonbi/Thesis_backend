@@ -98,7 +98,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            List<GameScore> gameScores = await Database.GameScores.All.Where(x => x.AchievedTime > since).OrderByDescending(x => x.Score).Take(Config.LEADERBOARD_SIZE).ToListAsync();
+            List<GameScore> gameScores = await Database.GameScores.All.Include(u => u.Owner).Where(x => x.AchievedTime > since).OrderByDescending(x => x.Score).Take(Config.LEADERBOARD_SIZE).ToListAsync();
 
             if (gameScores is null)
             {
