@@ -13,6 +13,8 @@ namespace Thesis_backend.Data_Structures
         public DbSet<Friend> FriendsTable { get; set; }
         public DbSet<Shop> ShopTable { get; set; }
         public DbSet<OwnedCar> OwnedCarsTable { get; set; }
+        public DbSet<TaskHistory> TaskHistoriesTable { get; set; }
+        public DbSet<GameScore> GameScoresTable { get; set; }
 
         public DataTable<User> Users { get; set; }
         public DataTable<Game> Games { get; set; }
@@ -21,6 +23,8 @@ namespace Thesis_backend.Data_Structures
         public DataTable<UserSettings> UserSettings { get; set; }
         public DataTable<Shop> Shop { get; set; }
         public DataTable<OwnedCar> OwnedCars { get; set; }
+        public DataTable<GameScore> GameScores { get; set; }
+        public DataTable<TaskHistory> TaskHistories { get; set; }
 
         public ThesisDbContext(DbContextOptions<ThesisDbContext> options)
         : base(options)
@@ -32,6 +36,8 @@ namespace Thesis_backend.Data_Structures
             Shop = new DataTable<Shop>(this, ShopTable!);
             OwnedCars = new DataTable<OwnedCar>(this, OwnedCarsTable!);
             Games = new DataTable<Game>(this, GamesTable!);
+            GameScores = new DataTable<GameScore>(this, GameScoresTable!);
+            TaskHistories = new DataTable<TaskHistory>(this, TaskHistoriesTable!);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -119,6 +125,20 @@ namespace Thesis_backend.Data_Structures
                 entity.HasIndex(goc => new { goc.GameId, goc.ShopId })
                       .IsUnique(); // Composite unique constraint
             });
+
+            modelBuilder.Entity<GameScore>(entity =>
+            {
+                entity.HasOne(u => u.Owner)
+                      .WithMany()
+                      .HasForeignKey(o => o.OwnerId);
+            });
+
+            modelBuilder.Entity<TaskHistory>(entity =>
+            {
+                entity.HasOne(u => u.Owner)
+                      .WithMany()
+                      .HasForeignKey(o => o.OwnerId);
+            });
         }
 
         public bool Exists()
@@ -186,6 +206,8 @@ namespace Thesis_backend.Data_Structures
             if (typeof(T) == typeof(Shop)) return (IDataTable<T>)Shop;
             if (typeof(T) == typeof(OwnedCar)) return (IDataTable<T>)OwnedCars;
             if (typeof(T) == typeof(Game)) return (IDataTable<T>)Games;
+            if (typeof(T) == typeof(GameScore)) return (IDataTable<T>)GameScores;
+            if (typeof(T) == typeof(TaskHistory)) return (IDataTable<T>)TaskHistories;
 
             throw new KeyNotFoundException("No such table is in the db");
         }

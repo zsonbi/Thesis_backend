@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Thesis_backend.Data_Structures
 {
