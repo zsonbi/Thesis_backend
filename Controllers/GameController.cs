@@ -91,7 +91,7 @@ namespace Thesis_backend.Controllers
         }
 
         [HttpGet("Scores/Get")]
-        public async Task<IActionResult> GetScores([FromBody] DateTime since)
+        public async Task<IActionResult> GetScores([FromQuery] DateTime since)
         {
             if (!CheckUserLoggedIn())
             {
