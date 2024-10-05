@@ -67,6 +67,47 @@ namespace Thesis_backend.Controllers
             return Ok(game.OwnedCars?.Select(x => x.Serialize));
         }
 
+        [HttpPost("StoreScore")]
+        public async Task<IActionResult> StoreScore([FromBody] int score)
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+            User? loggedInUser = await Database.Users.All.SingleOrDefaultAsync(x => x.ID == loggedInUserId);
+            if (loggedInUser is null)
+            {
+                return NotFound("Can't find logged in user");
+            }
+            GameScore gameScore = new GameScore() { Owner = loggedInUser, AchievedTime = DateTime.UtcNow, Score = score };
+            if (!await Create(gameScore))
+            {
+                return BadRequest("Can't create the game score record");
+            }
+
+            return Ok(gameScore.Serialize);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetScores([FromBody] DateTime since)
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            List<GameScore> gameScores = await Database.GameScores.All.Where(x => x.AchievedTime > since).OrderByDescending(x => x.Score).Take(Config.LEADERBOARD_SIZE).ToListAsync();
+
+            if (gameScores is null)
+            {
+                return NotFound("Can't find the game score leaderboard");
+            }
+
+            return Ok(gameScores.Select(x => x.Serialize));
+        }
+
         [HttpPatch("AddCoin")]
         public async Task<IActionResult> AddCoin([FromBody] int amount)
         {
@@ -103,23 +144,23 @@ namespace Thesis_backend.Controllers
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
             User? loggedInUser = await Database.Users.All.SingleOrDefaultAsync(x => x.ID == loggedInUserId);
 
-            if(loggedInUser is null)
+            if (loggedInUser is null)
             {
                 return NotFound("Can't find logged in user");
             }
-            if(loggedInUser.CurrentTaskScore < Config.TURBO_TASK_POINT_COST)
+            if (loggedInUser.CurrentTaskScore < Config.TURBO_TASK_POINT_COST)
             {
                 return BadRequest("Not enough task points to buy turbo");
             }
-            loggedInUser.CurrentTaskScore-=Config.TURBO_TASK_POINT_COST;
+            loggedInUser.CurrentTaskScore -= Config.TURBO_TASK_POINT_COST;
 
-            if (!await Update(loggedInUser)){
+            if (!await Update(loggedInUser))
+            {
                 return BadRequest("Couldn't update the user");
             }
 
             return Ok(loggedInUser.Serialize);
         }
-
 
         [HttpPatch("PowerUp/Immunity")]
         public async Task<IActionResult> BuyInvincibility()
@@ -149,6 +190,5 @@ namespace Thesis_backend.Controllers
 
             return Ok(loggedInUser.Serialize);
         }
-
     }
 }

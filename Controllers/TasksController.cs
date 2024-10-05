@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Collections.Immutable;
 using Thesis;
 using Thesis_backend.Data_Structures;
 
@@ -42,6 +43,26 @@ namespace Thesis_backend.Controllers
                 return NotFound("No task with the following id");
             }
             return Ok(task.Serialize);
+        }
+
+        [HttpGet("History")]
+        public async Task<IActionResult> GetTaskHistories()
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+
+            List<TaskHistory> taskHistories = await Database.TaskHistories.All.Where(x => x.OwnerId == loggedInUserId).OrderByDescending(x => x.Completed).Take(Config.TASK_HISTORY_SIZE).ToListAsync();
+
+            if (taskHistories is null)
+            {
+                return NotFound("Can't find the task requests");
+            }
+
+            return Ok(taskHistories.Select(x => x.Serialize));
         }
 
         [HttpPost("Cheat")]
@@ -164,7 +185,11 @@ namespace Thesis_backend.Controllers
 
             bool userScoreUpdate = await Update<Data_Structures.User>(task.TaskOwner);
 
-            if (taskUpdateResult && userScoreUpdate)
+            TaskHistory taskHistory = new TaskHistory() { CompletedTask = task, Owner = task.TaskOwner, Completed = DateTime.UtcNow };
+
+            bool taskHistoryCreate = await Create(taskHistory);
+
+            if (taskUpdateResult && userScoreUpdate && taskHistoryCreate)
             {
                 return Ok(task.Serialize);
             }
