@@ -116,7 +116,11 @@ namespace Thesis_backend.Data_Structures
                     new Shop() { ID = 3, CarType = CarType.Epic, Cost = 125, ProductName = "Ferrari", Buyable = true },
                     new Shop() { ID = 4, CarType = CarType.Legendary, Cost = 400, ProductName = "Lamborghini", Buyable = true },
                     new Shop() { ID = 5, CarType = CarType.Rare, Cost = 75, ProductName = "Jeep", Buyable = true },
-                    new Shop() { ID = 6, CarType = CarType.Legendary, Cost = 250, ProductName = "Rover", Buyable = true }
+                    new Shop() { ID = 6, CarType = CarType.Epic, Cost = 250, ProductName = "Rover", Buyable = true },
+                    new Shop() { ID = 7, CarType = CarType.Legendary, Cost = 450, ProductName = "Forma1", Buyable = true },
+                    new Shop() { ID = 8, CarType = CarType.Rare, Cost = 100, ProductName = "Ambulance", Buyable = true },
+                    new Shop() { ID = 9, CarType = CarType.Common, Cost = 25, ProductName = "Taxi", Buyable = true },
+                    new Shop() { ID = 10, CarType = CarType.Common, Cost = 40, ProductName = "Van", Buyable = true }
                     );
             });
 
