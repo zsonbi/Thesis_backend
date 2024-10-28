@@ -106,7 +106,7 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("No user is logged in");
             }
-            return Ok(user.UserTasks?.Select(x => x.Serialize));
+            return Ok(user.UserTasks?.Where(x => !x.Deleted)?.Select(x => x.Serialize));
         }
 
         [HttpPost("Create")]
@@ -128,6 +128,7 @@ namespace Thesis_backend.Controllers
                 TaskOwner = user,
                 Completed = false,
                 PeriodRate = request.PeriodRate,
+                Deleted = false,
             };
 
             Data_Structures.PlayerTask? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType);
@@ -242,14 +243,14 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("No task found with this Id");
             }
-
-            if (await Delete<Data_Structures.PlayerTask>(task))
+            task.Deleted = true;
+            if (await Update<Data_Structures.PlayerTask>(task))
             {
                 return Ok("Deleted");
             }
             else
             {
-                return NotFound("Failed to delete task");
+                return NotFound("Couldn't delete the task");
             }
         }
 
