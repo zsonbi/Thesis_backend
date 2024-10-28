@@ -131,7 +131,7 @@ namespace Thesis_backend.Controllers
                 Deleted = false,
             };
 
-            Data_Structures.PlayerTask? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType);
+            Data_Structures.PlayerTask? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType && !x.Deleted);
 
             if (existingTask is null)
             {
