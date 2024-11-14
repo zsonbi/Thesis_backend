@@ -1,4 +1,4 @@
-CREATE DATABASE Thesis;
+CREATE DATABASE IF NOT EXISTS Thesis;
 CREATE USER IF NOT EXISTS 'server_access'@'%' IDENTIFIED BY 'test_password';
-GRANT ALL PRIVILEGES ON *.* TO 'server_access'@'%';
+GRANT ALL PRIVILEGES ON Thesis.* TO 'server_access'@'%';
 FLUSH PRIVILEGES;
