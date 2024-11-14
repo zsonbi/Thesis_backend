@@ -19,6 +19,19 @@ services:
       thesis-internal-network:
         ipv4_address: ${MIGRATION_IP}
 
+  init:
+    image: alpine:latest  # Use a lightweight image like Alpine
+    container_name: init_service
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ./docker:/scripts  # Mount the folder where your init scripts are
+    command: /bin/sh -c "/scripts/init.sh"  # Run the init.sh script from /scripts
+    # Optionally, set restart: on-failure if you want retries in case the init service fails
+    restart: "no"
+
 
   mariadb:
     image: mariadb:11.4.2-noble
@@ -30,6 +43,8 @@ services:
         - ./docker/initSQL/:/docker-entrypoint-initdb.d/
         - ./DbData/:/var/lib/mysql/
     restart: unless-stopped
+    depends_on:
+      - init  # MariaDB depends on the init service completing first
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 1m
