@@ -1,16 +1,20 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Text.Json.Serialization;
 
 namespace Thesis_backend.Data_Structures
 {
     public record Friend : DbElement
     {
-        public User? Sender { get; set; }
-        public User? Reciever { get; set; }
+        public long SenderId { get; set; }
 
-        public DateTime SentTime { get; set; } = DateTime.Now;
+        public User? Sender { get; set; }
+
+        public long ReceiverId { get; set; }
+        public User? Receiver { get; set; }
+
+        public DateTime SentTime { get; set; } = DateTime.UtcNow;
 
         public bool Pending { get; set; } = true;
-
-        public override object Serialize => new { ID, sender = Sender?.ID, reciever = Reciever?.ID, SentTime, Pending };
+        [JsonIgnore]
+        public override object Serialize => new { ID, Sender = Sender?.Serialize, Receiver = Receiver?.Serialize, SentTime, Pending };
     }
 }

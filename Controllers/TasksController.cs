@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Collections.Immutable;
 using Thesis;
 using Thesis_backend.Data_Structures;
 
@@ -35,12 +37,64 @@ namespace Thesis_backend.Controllers
                 return NotFound("Incorrect ID format");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(u => u.TaskOwner).SingleOrDefaultAsync(x => x.ID == convertedID && x.TaskOwner.ID == GetLoggedInUser());
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(u => u.TaskOwner).SingleOrDefaultAsync(x => x.ID == convertedID && x.TaskOwner.ID == GetLoggedInUser());
             if (task is null)
             {
                 return NotFound("No task with the following id");
             }
             return Ok(task.Serialize);
+        }
+
+        [HttpGet("History")]
+        public async Task<IActionResult> GetTaskHistories()
+        {
+            if (!CheckUserLoggedIn())
+            {
+                return NotFound("Not logged in");
+            }
+
+            long loggedInUserId = (long)(this.GetLoggedInUser()!);
+
+            List<TaskHistory> taskHistories = await Database.TaskHistories.All.Include(t => t.CompletedTask).Where(x => x.OwnerId == loggedInUserId).Take(Config.TASK_HISTORY_SIZE).OrderByDescending(x => x.Completed).ToListAsync();
+
+            if (taskHistories is null)
+            {
+                return NotFound("Can't find the task history");
+            }
+
+            return Ok(taskHistories.Select(x => x.Serialize));
+        }
+
+        [HttpPost("Cheat")]
+        public async Task<IActionResult> CheatTaskScore([FromBody] string password, int amount)
+        {
+            if (password != Config.TASK_SCORE_CHEAT_PASSWORD)
+            {
+                return BadRequest("Incorrect cheat password");
+            }
+
+            long? loggedInUser = GetLoggedInUser();
+            if (loggedInUser == 0 || loggedInUser is null)
+            {
+                return NotFound("Not logged in");
+            }
+            User? User = await Database.Users.Get(loggedInUser.Value);
+
+            if (User is null)
+            {
+                return NotFound("Can't find the user");
+            }
+            User.CurrentTaskScore += amount;
+            bool userScoreUpdate = await Update<Data_Structures.User>(User);
+
+            if (userScoreUpdate)
+            {
+                return Ok(User.Serialize);
+            }
+            else
+            {
+                return NotFound("Couldn't cheat the task score for the user");
+            }
         }
 
         [HttpGet("GetAll")]
@@ -52,8 +106,7 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("No user is logged in");
             }
-
-            return Ok(user.UserTasks?.Select(x => x.Serialize));
+            return Ok(user.UserTasks?.Where(x => !x.Deleted)?.Select(x => x.Serialize));
         }
 
         [HttpPost("Create")]
@@ -66,18 +119,19 @@ namespace Thesis_backend.Controllers
                 return NotFound("No user is logged in");
             }
 
-            Data_Structures.Task taskToSave = new Data_Structures.Task()
+            Data_Structures.PlayerTask taskToSave = new Data_Structures.PlayerTask()
             {
                 TaskName = request.TaskName,
                 Description = request.Description,
-                Updated = DateTime.Now,
+                Updated = DateTime.UtcNow,
                 TaskType = request.TaskType,
                 TaskOwner = user,
                 Completed = false,
                 PeriodRate = request.PeriodRate,
+                Deleted = false,
             };
 
-            Data_Structures.Task? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType);
+            Data_Structures.PlayerTask? existingTask = user?.UserTasks?.Find(x => x.TaskName == request.TaskName && x.TaskType == request.TaskType && !x.Deleted);
 
             if (existingTask is null)
             {
@@ -102,20 +156,41 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID);
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID);
             if (task is null)
             {
                 return NotFound("No task found with this Id");
             }
-            if (task.LastCompleted.AddMinutes(task.PeriodRate) >= DateTime.Now)
+
+            if (task.LastCompleted.AddMinutes(task.PeriodRate) >= DateTime.UtcNow)
             {
                 return BadRequest("The task can't be completed yet");
             }
 
             task.Completed = true;
-            task.LastCompleted = DateTime.Now;
+            task.LastCompleted = DateTime.UtcNow;
 
-            if (await Update<Data_Structures.Task>(task))
+            bool taskUpdateResult = await Update<Data_Structures.PlayerTask>(task);
+            if (task.TaskType)
+            {
+                task.TaskOwner.TotalScore -= DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.CurrentTaskScore -= DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.CompletedBadTasks++;
+            }
+            else
+            {
+                task.TaskOwner.TotalScore += DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.CurrentTaskScore += DetermineTaskScore(task.PeriodRate);
+                task.TaskOwner.CompletedGoodTasks++;
+            }
+
+            bool userScoreUpdate = await Update<Data_Structures.User>(task.TaskOwner);
+
+            TaskHistory taskHistory = new TaskHistory() { CompletedTask = task, TaskId = task.ID, Owner = task.TaskOwner, Completed = DateTime.UtcNow };
+
+            bool taskHistoryCreate = await Create(taskHistory);
+
+            if (taskUpdateResult && userScoreUpdate && taskHistoryCreate)
             {
                 return Ok(task.Serialize);
             }
@@ -134,7 +209,7 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
             if (task is null)
             {
                 return NotFound("No task found with this Id");
@@ -144,7 +219,7 @@ namespace Thesis_backend.Controllers
             task.TaskType = request.TaskType;
             task.Description = request.Description;
 
-            if (await Update<Data_Structures.Task>(task))
+            if (await Update<Data_Structures.PlayerTask>(task))
             {
                 return Ok(task.Serialize);
             }
@@ -163,19 +238,54 @@ namespace Thesis_backend.Controllers
                 return NotFound("Not logged in");
             }
 
-            Data_Structures.Task? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
+            Data_Structures.PlayerTask? task = await Database.Tasks.All.Include(x => x.TaskOwner).SingleOrDefaultAsync(x => x.ID.ToString() == ID && x.TaskOwner.ID == loggedInUser);
             if (task is null)
             {
                 return NotFound("No task found with this Id");
             }
-
-            if (await Delete<Data_Structures.Task>(task))
+            task.Deleted = true;
+            if (await Update<Data_Structures.PlayerTask>(task))
             {
                 return Ok("Deleted");
             }
             else
             {
-                return NotFound("Failed to delete task");
+                return NotFound("Couldn't delete the task");
+            }
+        }
+
+        private long DetermineTaskScore(int periodRate)
+        {
+            switch (periodRate)
+            {
+                case 60:
+                    return (long)TaskScores.Hourly;
+
+                case 120:
+                    return (long)TaskScores.EveryTwoHours;
+
+                case 240:
+                    return (long)TaskScores.EveryFourHours;
+
+                case 1440:
+                    return (long)TaskScores.Daily;
+
+                case 2880:
+                    return (long)TaskScores.EveryTwoDays;
+
+                case 10080:
+                    return (long)TaskScores.Weekly;
+
+                case 20160:
+                    return (long)TaskScores.EveryTwoWeeks;
+
+                case 40320:
+                    return (long)TaskScores.Monthly;
+
+                default:
+                    Console.WriteLine("Can't find such period rate to score");
+                    return 0;
+                    break;
             }
         }
     }

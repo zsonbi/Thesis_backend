@@ -41,7 +41,9 @@ namespace Thesis_backend
                          builder.WithOrigins("https://zsonbi.github.io/Thesis/game/", "https://zsonbi.github.io", "https://thesis.picidolgok.hu", "http://thesis.picidolgok.hu")
                              .AllowAnyHeader() // With any type of headers...
                              .AllowAnyMethod() // And any HTTP methods. Such a jolly party indeed!
-                             .AllowCredentials();
+                             .AllowCredentials()
+                             .SetIsOriginAllowedToAllowWildcardSubdomains()
+                             .WithExposedHeaders("Set-Cookie", "Content-Type", "Authorization", "X-Requested-With");
                      });
              });
 
@@ -64,14 +66,12 @@ namespace Thesis_backend
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseSession();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
             app.MapControllers();
-
-            app.UseSession();
 
             app.Run();
         }

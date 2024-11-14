@@ -10,11 +10,17 @@ namespace Thesis_backend.Data_Structures
         public string PasswordHash { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public UserSettings? UserSettings { get; set; }
-        public long GameId { get; set; }
+        public Game? Game { get; set; }
         public DateTime LastLoggedIn { get; set; }
         public DateTime Registered { get; set; }
-        public List<Task>? UserTasks { get; set; }
+        public List<PlayerTask>? UserTasks { get; set; }
+
+        public long TotalScore { get; set; } = 0;
+        public long CurrentTaskScore { get; set; } = 0;
+        public int CompletedGoodTasks { get; set; } = 0;
+        public int CompletedBadTasks { get; set; } = 0;
+
         [JsonIgnore]
-        public override object Serialize => new { Username, PasswordHash, Email, UserSettings?.Serialize, GameId, LastLoggedIn, Registered, UserTasks };
+        public override object Serialize => new { ID, Username, PasswordHash, Email, userSettings = UserSettings?.Serialize, game = Game?.Serialize, LastLoggedIn, Registered, UserTasks, TotalScore, CurrentTaskScore, CompletedGoodTasks, CompletedBadTasks };
     }
 }

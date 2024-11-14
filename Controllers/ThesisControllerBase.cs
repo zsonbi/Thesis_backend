@@ -153,24 +153,5 @@ namespace Thesis_backend.Controllers
                 return Ok(JsonSerializer.Serialize<T>(t));
             }
         }
-
-        protected string GetClaim(string claimString)
-        {
-            if (HttpContext is null
-                || HttpContext.User is null
-                || HttpContext.User.Identity is null ||
-                !HttpContext.User.Identity.IsAuthenticated)
-            {
-                return "";
-            }
-
-            var claim = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == claimString);
-            if (claim == null)
-            {
-                return "";
-            }
-
-            return claim.Value;
-        }
     }
 }

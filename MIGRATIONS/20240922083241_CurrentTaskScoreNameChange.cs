@@ -5,24 +5,24 @@
 namespace Thesis_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class userSettingsConstraint : Migration
+    public partial class CurrentTaskScoreNameChange : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "completed",
-                table: "TasksTable",
-                newName: "Completed");
+                name: "Currency",
+                table: "UsersTable",
+                newName: "CurrentTaskScore");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "Completed",
-                table: "TasksTable",
-                newName: "completed");
+                name: "CurrentTaskScore",
+                table: "UsersTable",
+                newName: "Currency");
         }
     }
 }

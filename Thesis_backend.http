@@ -1,6 +1,0 @@
-@Thesis_backend_HostAddress = http://localhost:5133
-
-GET {{Thesis_backend_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

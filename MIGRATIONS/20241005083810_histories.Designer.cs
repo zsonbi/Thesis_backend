@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis_backend.Data_Structures;
 
@@ -11,9 +12,11 @@ using Thesis_backend.Data_Structures;
 namespace Thesis_backend.Migrations
 {
     [DbContext(typeof(ThesisDbContext))]
-    partial class ThesisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005083810_histories")]
+    partial class histories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,9 +145,6 @@ namespace Thesis_backend.Migrations
                     b.Property<bool>("Completed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
@@ -243,41 +243,9 @@ namespace Thesis_backend.Migrations
                         {
                             ID = 6L,
                             Buyable = true,
-                            CarType = 2,
+                            CarType = 3,
                             Cost = 250,
                             ProductName = "Rover"
-                        },
-                        new
-                        {
-                            ID = 7L,
-                            Buyable = true,
-                            CarType = 3,
-                            Cost = 450,
-                            ProductName = "Forma1"
-                        },
-                        new
-                        {
-                            ID = 8L,
-                            Buyable = true,
-                            CarType = 1,
-                            Cost = 100,
-                            ProductName = "Ambulance"
-                        },
-                        new
-                        {
-                            ID = 9L,
-                            Buyable = true,
-                            CarType = 0,
-                            Cost = 25,
-                            ProductName = "Taxi"
-                        },
-                        new
-                        {
-                            ID = 10L,
-                            Buyable = true,
-                            CarType = 0,
-                            Cost = 40,
-                            ProductName = "Van"
                         });
                 });
 
@@ -292,6 +260,9 @@ namespace Thesis_backend.Migrations
                     b.Property<DateTime>("Completed")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<long>("CompletedTaskID")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("OwnerId")
                         .HasColumnType("bigint");
 
@@ -300,9 +271,9 @@ namespace Thesis_backend.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("CompletedTaskID");
 
-                    b.HasIndex("TaskId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("TaskHistoriesTable");
                 });
@@ -457,15 +428,15 @@ namespace Thesis_backend.Migrations
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.TaskHistory", b =>
                 {
-                    b.HasOne("Thesis_backend.Data_Structures.User", "Owner")
+                    b.HasOne("Thesis_backend.Data_Structures.PlayerTask", "CompletedTask")
                         .WithMany()
-                        .HasForeignKey("OwnerId")
+                        .HasForeignKey("CompletedTaskID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Thesis_backend.Data_Structures.PlayerTask", "CompletedTask")
+                    b.HasOne("Thesis_backend.Data_Structures.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("TaskId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -12,8 +12,8 @@ using Thesis_backend.Data_Structures;
 namespace Thesis_backend.Migrations
 {
     [DbContext(typeof(ThesisDbContext))]
-    [Migration("20240721080940_TaskChanges")]
-    partial class TaskChanges
+    [Migration("20240921104018_AddGameOwnedCarTable")]
+    partial class AddGameOwnedCarTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,36 @@ namespace Thesis_backend.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Friend", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<bool>("Pending")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<long>("ReceiverId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SenderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("SentTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId", "ReceiverId")
+                        .IsUnique();
+
+                    b.ToTable("FriendsTable");
+                });
+
             modelBuilder.Entity("Thesis_backend.Data_Structures.Game", b =>
                 {
                     b.Property<long>("ID")
@@ -33,8 +63,8 @@ namespace Thesis_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<DateTime>("Currency")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long>("Currency")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("CurrentXP")
                         .HasColumnType("bigint");
@@ -45,12 +75,42 @@ namespace Thesis_backend.Migrations
                     b.Property<int>("NextLVLXP")
                         .HasColumnType("int");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("ID");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("GamesTable");
                 });
 
-            modelBuilder.Entity("Thesis_backend.Data_Structures.Task", b =>
+            modelBuilder.Entity("Thesis_backend.Data_Structures.OwnedCar", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ShopId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ShopId");
+
+                    b.HasIndex("GameId", "ShopId")
+                        .IsUnique();
+
+                    b.ToTable("OwnedCarsTable");
+                });
+
+            modelBuilder.Entity("Thesis_backend.Data_Structures.PlayerTask", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
@@ -60,6 +120,9 @@ namespace Thesis_backend.Migrations
 
                     b.Property<bool>("Completed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("LastCompleted")
                         .HasColumnType("datetime(6)");
@@ -87,6 +150,28 @@ namespace Thesis_backend.Migrations
                     b.ToTable("TasksTable");
                 });
 
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Shop", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<int>("CarType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Cost")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ShopTable");
+                });
+
             modelBuilder.Entity("Thesis_backend.Data_Structures.User", b =>
                 {
                     b.Property<long>("ID")
@@ -95,12 +180,12 @@ namespace Thesis_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
 
+                    b.Property<long>("Currency")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
-
-                    b.Property<long>("GameId")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("LastLoggedIn")
                         .HasColumnType("datetime(6)");
@@ -112,6 +197,9 @@ namespace Thesis_backend.Migrations
                     b.Property<DateTime>("Registered")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<long>("TotalScore")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -122,6 +210,9 @@ namespace Thesis_backend.Migrations
                         .IsUnique();
 
                     b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.HasIndex("Username", "Email")
                         .IsUnique();
 
                     b.ToTable("UsersTable");
@@ -152,7 +243,56 @@ namespace Thesis_backend.Migrations
                     b.ToTable("UserSettingsTable");
                 });
 
-            modelBuilder.Entity("Thesis_backend.Data_Structures.Task", b =>
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Friend", b =>
+                {
+                    b.HasOne("Thesis_backend.Data_Structures.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Thesis_backend.Data_Structures.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Game", b =>
+                {
+                    b.HasOne("Thesis_backend.Data_Structures.User", "User")
+                        .WithOne("Game")
+                        .HasForeignKey("Thesis_backend.Data_Structures.Game", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Thesis_backend.Data_Structures.OwnedCar", b =>
+                {
+                    b.HasOne("Thesis_backend.Data_Structures.Game", "Game")
+                        .WithMany("OwnedCars")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Thesis_backend.Data_Structures.Shop", "Shop")
+                        .WithMany()
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("Thesis_backend.Data_Structures.PlayerTask", b =>
                 {
                     b.HasOne("Thesis_backend.Data_Structures.User", "TaskOwner")
                         .WithMany("UserTasks")
@@ -174,8 +314,16 @@ namespace Thesis_backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Thesis_backend.Data_Structures.Game", b =>
+                {
+                    b.Navigation("OwnedCars");
+                });
+
             modelBuilder.Entity("Thesis_backend.Data_Structures.User", b =>
                 {
+                    b.Navigation("Game")
+                        .IsRequired();
+
                     b.Navigation("UserSettings");
 
                     b.Navigation("UserTasks");

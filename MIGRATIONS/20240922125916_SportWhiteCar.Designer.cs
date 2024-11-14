@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thesis_backend.Data_Structures;
 
@@ -11,9 +12,11 @@ using Thesis_backend.Data_Structures;
 namespace Thesis_backend.Migrations
 {
     [DbContext(typeof(ThesisDbContext))]
-    partial class ThesisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240922125916_SportWhiteCar")]
+    partial class SportWhiteCar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,8 +63,8 @@ namespace Thesis_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<int>("Currency")
-                        .HasColumnType("int");
+                    b.Property<long>("Currency")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("CurrentXP")
                         .HasColumnType("bigint");
@@ -81,30 +84,6 @@ namespace Thesis_backend.Migrations
                         .IsUnique();
 
                     b.ToTable("GamesTable");
-                });
-
-            modelBuilder.Entity("Thesis_backend.Data_Structures.GameScore", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
-
-                    b.Property<DateTime>("AchievedTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long>("OwnerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("GameScoresTable");
                 });
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.OwnedCar", b =>
@@ -140,9 +119,6 @@ namespace Thesis_backend.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
 
                     b.Property<bool>("Completed")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("Deleted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Description")
@@ -214,97 +190,7 @@ namespace Thesis_backend.Migrations
                             CarType = 1,
                             Cost = 50,
                             ProductName = "Sport white car"
-                        },
-                        new
-                        {
-                            ID = 3L,
-                            Buyable = true,
-                            CarType = 2,
-                            Cost = 125,
-                            ProductName = "Ferrari"
-                        },
-                        new
-                        {
-                            ID = 4L,
-                            Buyable = true,
-                            CarType = 3,
-                            Cost = 400,
-                            ProductName = "Lamborghini"
-                        },
-                        new
-                        {
-                            ID = 5L,
-                            Buyable = true,
-                            CarType = 1,
-                            Cost = 75,
-                            ProductName = "Jeep"
-                        },
-                        new
-                        {
-                            ID = 6L,
-                            Buyable = true,
-                            CarType = 2,
-                            Cost = 250,
-                            ProductName = "Rover"
-                        },
-                        new
-                        {
-                            ID = 7L,
-                            Buyable = true,
-                            CarType = 3,
-                            Cost = 450,
-                            ProductName = "Forma1"
-                        },
-                        new
-                        {
-                            ID = 8L,
-                            Buyable = true,
-                            CarType = 1,
-                            Cost = 100,
-                            ProductName = "Ambulance"
-                        },
-                        new
-                        {
-                            ID = 9L,
-                            Buyable = true,
-                            CarType = 0,
-                            Cost = 25,
-                            ProductName = "Taxi"
-                        },
-                        new
-                        {
-                            ID = 10L,
-                            Buyable = true,
-                            CarType = 0,
-                            Cost = 40,
-                            ProductName = "Van"
                         });
-                });
-
-            modelBuilder.Entity("Thesis_backend.Data_Structures.TaskHistory", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
-
-                    b.Property<DateTime>("Completed")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long>("OwnerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TaskId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("OwnerId");
-
-                    b.HasIndex("TaskId");
-
-                    b.ToTable("TaskHistoriesTable");
                 });
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.User", b =>
@@ -314,12 +200,6 @@ namespace Thesis_backend.Migrations
                         .HasColumnType("bigint");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ID"));
-
-                    b.Property<int>("CompletedBadTasks")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CompletedGoodTasks")
-                        .HasColumnType("int");
 
                     b.Property<long>("CurrentTaskScore")
                         .HasColumnType("bigint");
@@ -414,17 +294,6 @@ namespace Thesis_backend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Thesis_backend.Data_Structures.GameScore", b =>
-                {
-                    b.HasOne("Thesis_backend.Data_Structures.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Owner");
-                });
-
             modelBuilder.Entity("Thesis_backend.Data_Structures.OwnedCar", b =>
                 {
                     b.HasOne("Thesis_backend.Data_Structures.Game", "Game")
@@ -453,25 +322,6 @@ namespace Thesis_backend.Migrations
                         .IsRequired();
 
                     b.Navigation("TaskOwner");
-                });
-
-            modelBuilder.Entity("Thesis_backend.Data_Structures.TaskHistory", b =>
-                {
-                    b.HasOne("Thesis_backend.Data_Structures.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Thesis_backend.Data_Structures.PlayerTask", "CompletedTask")
-                        .WithMany()
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CompletedTask");
-
-                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Thesis_backend.Data_Structures.UserSettings", b =>

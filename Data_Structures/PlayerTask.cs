@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Thesis_backend.Data_Structures
 {
-    public record Task : DbElement
+    public record PlayerTask : DbElement
     {
         public required User TaskOwner { get; set; }
         public required string TaskName { get; set; }
@@ -13,7 +13,8 @@ namespace Thesis_backend.Data_Structures
         public DateTime Updated { get; set; }
         public DateTime LastCompleted { get; set; }
         public bool Completed { get; set; }
+        public bool Deleted { get; set; } = false;
         [JsonIgnore]
-        public override object Serialize => new { ID, TaskName, Description, TaskType, PeriodRate, Updated, LastCompleted, Completed };
+        public override object Serialize => new { ID, TaskName, Description, TaskType, PeriodRate, Updated, LastCompleted, Completed, Deleted };
     }
 }

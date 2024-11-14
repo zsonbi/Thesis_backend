@@ -39,15 +39,22 @@ namespace Thesis_backend.Controllers
             }
             if (storedUserId == reciever.ID.ToString())
             {
-                return BadRequest("Can't send friend request to yourself");
+                return Conflict("Can't send friend request to yourself");
+            }
+
+            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Receiver).Include(s => s.Sender).SingleOrDefaultAsync(x => x.Receiver!.ID == GetLoggedInUser() && x.Sender!.ID == reciever.ID);
+
+            if (friend is not null)
+            {
+                return Conflict($"You can't send an another friend request to {reciever.Username}");
             }
 
             Friend newFriend = new Friend()
             {
                 Pending = true,
-                Reciever = reciever,
+                Receiver = reciever,
                 Sender = Database.Users.Get(Convert.ToInt64(storedUserId)).Result,
-                SentTime = DateTime.Now,
+                SentTime = DateTime.UtcNow,
             };
 
             if (!await Create(newFriend))
@@ -58,7 +65,7 @@ namespace Thesis_backend.Controllers
             return CreatedAtAction(nameof(GetFriend), new { id = newFriend.ID }, newFriend.Serialize);
         }
 
-        [HttpGet("GetByID/{ID}")]
+        [HttpGet("{ID}/Get")]
         public async Task<IActionResult> GetFriendByID(string ID)
         {
             if (!CheckUserLoggedIn())
@@ -72,13 +79,13 @@ namespace Thesis_backend.Controllers
                 return NotFound("Incorrect ID format");
             }
 
-            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Reciever).Include(s => s.Sender).SingleOrDefaultAsync(x => x.ID == convertedID);
+            Data_Structures.Friend? friend = await Database.Friends.All.Include(r => r.Receiver).Include(s => s.Sender).SingleOrDefaultAsync(x => x.ID == convertedID);
 
             if (friend is null)
             {
                 return NotFound("No friend with the following id");
             }
-            if (!(friend.Sender!.ID == GetLoggedInUser() || friend.Reciever!.ID == GetLoggedInUser()))
+            if (!(friend.Sender!.ID == GetLoggedInUser() || friend.Receiver!.ID == GetLoggedInUser()))
             {
                 return BadRequest("Not releated to you");
             }
@@ -97,9 +104,9 @@ namespace Thesis_backend.Controllers
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
 
             var friends = await Database.Friends.All
-            .Include(r => r.Reciever)
+            .Include(r => r.Receiver)
             .Include(s => s.Sender)
-            .Where(x => x.Sender!.ID == loggedInUserId || x.Reciever!.ID == loggedInUserId)
+            .Where(x => x.Sender!.ID == loggedInUserId || x.Receiver!.ID == loggedInUserId)
             .ToArrayAsync();
 
             if (friends is null)
@@ -110,8 +117,8 @@ namespace Thesis_backend.Controllers
             return Ok(friends.Select(x => x.Serialize));
         }
 
-        [HttpPatch("Accept")]
-        public async Task<IActionResult> AcceptFriendRequest([FromBody] string id)
+        [HttpPatch("{ID}/Accept")]
+        public async Task<IActionResult> AcceptFriendRequest(string ID)
         {
             if (!CheckUserLoggedIn())
             {
@@ -119,15 +126,25 @@ namespace Thesis_backend.Controllers
             }
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
+            long convertedID;
 
+            if (!long.TryParse(ID, out convertedID))
+            {
+                return NotFound("Incorrect ID format");
+            }
             var friend = await Database.Friends.All
-            .Include(r => r.Reciever)
+            .Include(r => r.Receiver)
             .Include(s => s.Sender)
-            .SingleOrDefaultAsync(x => x.Reciever!.ID == loggedInUserId);
+            .SingleOrDefaultAsync(x => x.ID == convertedID);
 
             if (friend is null)
             {
-                return NotFound("No friend with releated user identification");
+                return NotFound("No friend with releated id");
+            }
+
+            if (friend.Receiver!.ID != loggedInUserId)
+            {
+                return NotFound("You can't accept this friend request you are not the reciever");
             }
 
             if (!friend.Pending)
@@ -143,8 +160,8 @@ namespace Thesis_backend.Controllers
             return Ok(friend);
         }
 
-        [HttpDelete("Delete")]
-        public async Task<IActionResult> RejectFriendRequest([FromBody] string id)
+        [HttpDelete("{ID}/Delete")]
+        public async Task<IActionResult> DeleteFriend(string ID)
         {
             if (!CheckUserLoggedIn())
             {
@@ -152,15 +169,26 @@ namespace Thesis_backend.Controllers
             }
 
             long loggedInUserId = (long)(this.GetLoggedInUser()!);
+            long convertedID;
+
+            if (!long.TryParse(ID, out convertedID))
+            {
+                return NotFound("Incorrect ID format");
+            }
 
             var friend = await Database.Friends.All
-            .Include(r => r.Reciever)
+            .Include(r => r.Receiver)
             .Include(s => s.Sender)
-            .SingleOrDefaultAsync(x => x.Reciever!.ID == loggedInUserId);
+            .SingleOrDefaultAsync(x => x.ID == convertedID);
 
             if (friend is null)
             {
-                return NotFound("No friend with releated user identification");
+                return NotFound("No friend with such friend id");
+            }
+
+            if (!(friend.Receiver?.ID == loggedInUserId || friend.Sender?.ID == loggedInUserId))
+            {
+                return NotFound("You have no such friend :C");
             }
             bool pending = friend.Pending;
             if (!await Delete(friend))
@@ -168,7 +196,7 @@ namespace Thesis_backend.Controllers
                 return BadRequest("Can't reject the friend request");
             }
 
-            return Ok("Rejected");
+            return Ok("Deleted");
         }
     }
 }

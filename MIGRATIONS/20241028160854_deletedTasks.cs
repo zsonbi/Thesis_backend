@@ -5,24 +5,25 @@
 namespace Thesis_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class TaskChanges : Migration
+    public partial class deletedTasks : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "Added",
+            migrationBuilder.AddColumn<bool>(
+                name: "Deleted",
                 table: "TasksTable",
-                newName: "Updated");
+                type: "tinyint(1)",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "Updated",
-                table: "TasksTable",
-                newName: "Added");
+            migrationBuilder.DropColumn(
+                name: "Deleted",
+                table: "TasksTable");
         }
     }
 }
