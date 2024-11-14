@@ -6,6 +6,9 @@ services:
     image: thesis_migration
     build:
       dockerfile: Dockerfile_db_migration
+      args:
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -19,9 +22,9 @@ services:
   mariadb:
     image: mariadb:11.4.2-noble
     environment:
-       MYSQL_ROOT_PASSWORD: root
-       MYSQL_USER: server_access
-       MYSQL_PASSWORD: test_password
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_USER: ${MYSQL_USER}
+       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
         - ./docker/initSQL/:/docker-entrypoint-initdb.d/
         - ./DbData/:/var/lib/mysql/
@@ -43,6 +46,9 @@ services:
     image: thesis
     build:
       dockerfile: Dockerfile
+      args:
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
       - "8000:8000"
       - "8001:8001"

@@ -6,11 +6,21 @@ WORKDIR .
 RUN mkdir /app
 COPY ./ /app
 WORKDIR /app
+
+ARG MYSQL_USER
+ARG MYSQL_PASSWORD
+
 RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.json
+RUN sed -ir "s/User=[^;]*;/User=$MYSQL_USER;/g" ./appsettings.json
+RUN sed -ir "s/Password=[^;]*;/Password=$MYSQL_PASSWORD;/g" ./appsettings.json
+
 RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.Development.json
+RUN sed -ir "s/User=[^;]*;/User=$MYSQL_USER;/g" ./appsettings.Development.json
+RUN sed -ir "s/Password=[^;]*;/Password=$MYSQL_PASSWORD;/g" ./appsettings.Development.json
 
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
+
 # RUN rm -rf Migrations/*
 # RUN dotnet ef migrations add InitialCreate -c ThesisDbContext
 RUN sed -i 's/\r//g' ./migrate.sh
