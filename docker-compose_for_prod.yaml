@@ -9,6 +9,7 @@ services:
       args:
         - MYSQL_USER=${MYSQL_USER}
         - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - DB_IP=${DB_IP}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -16,7 +17,7 @@ services:
       - ./MIGRATIONS:/app/MIGRATIONS  
     networks:
       thesis-internal-network:
-        ipv4_address: 10.110.1.13
+        ipv4_address: ${MIGRATION_IP}
 
 
   mariadb:
@@ -38,7 +39,7 @@ services:
       retries: 3
     networks:
       thesis-internal-network:
-        ipv4_address: 10.110.1.11
+        ipv4_address: ${DB_IP}
 
   thesis:
     tty: true
@@ -49,6 +50,7 @@ services:
       args:
         - MYSQL_USER=${MYSQL_USER}
         - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - DB_IP=${DB_IP}
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -70,7 +72,7 @@ services:
         condition: service_started
     networks:
       thesis-internal-network:
-        ipv4_address: 10.110.1.12
+        ipv4_address: ${SERVER_IP}
 
 
 
@@ -80,5 +82,5 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.110.0.0/16
-          gateway: 10.110.0.1
+        - subnet: ${SUBNET}
+          gateway: ${GATEWAY}

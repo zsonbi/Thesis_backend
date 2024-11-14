@@ -8,6 +8,7 @@ EXPOSE 8081
 
 ARG MYSQL_USER
 ARG MYSQL_PASSWORD
+ARG DB_IP
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -15,13 +16,10 @@ WORKDIR /src
 COPY ["Thesis_backend.csproj", "."]
 RUN dotnet restore "./Thesis_backend.csproj"
 COPY . .
-RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.json
+RUN sed -ir "s/Server=[^;]*;/Server=$DB_IP;/g" ./appsettings.json
 RUN sed -ir "s/User=[^;]*;/User=$MYSQL_USER;/g" ./appsettings.json
 RUN sed -ir "s/Password=[^;]*;/Password=$MYSQL_PASSWORD;/g" ./appsettings.json
 
-RUN sed -ir "s/Server=[^;]*;/Server=10.110.1.11;/g" ./appsettings.Development.json
-RUN sed -ir "s/User=[^;]*;/User=$MYSQL_USER;/g" ./appsettings.Development.json
-RUN sed -ir "s/Password=[^;]*;/Password=$MYSQL_PASSWORD;/g" ./appsettings.Development.json
 
 WORKDIR "/src/."
 RUN dotnet build "./Thesis_backend.csproj" -c $BUILD_CONFIGURATION -o /app/build
