@@ -29,8 +29,8 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - ./docker:/scripts  # Mount the folder where your init scripts are
-    command: /bin/sh -c "/scripts/init.sh"  # Run the init.sh script from /scripts
-    # Optionally, set restart: on-failure if you want retries in case the init service fails
+    command: /bin/sh -c "apk add --no-cache dos2unix && dos2unix /scripts/init.sh && \
+             chmod +x /scripts/init.sh && /scripts/init.sh"
     restart: "no"
 
 
@@ -44,10 +44,8 @@ services:
         - ./docker/initSQL/:/docker-entrypoint-initdb.d/
         # - ./DbData/:/var/lib/mysql/
     depends_on:
-        - init  # MariaDB depends on the init service completing first
-    # command: ["/bin/bash", "/docker-entrypoint-initdb.d/init.sh"]
-    # entrypoint: ["/bin/bash", "/docker-entrypoint-initdb.d/custom-entrypoint.sh"]
-    # command: /bin/bash -c "/docker-entrypoint-initdb.d/init.sh && /usr/local/bin/docker-entrypoint.sh mysqld"
+      init:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 1m
