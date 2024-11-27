@@ -87,6 +87,16 @@ namespace Thesis_backend.Controllers
         {
             bool testUser = request.UserName.Contains("testt7GuSu");
 
+            if (request.UserName == "")
+            {
+                return BadRequest("Username can't be empty");
+            }
+
+            if (request.Password == "")
+            {
+                return BadRequest("Password can't be empty");
+            }
+
             User newUser = new User()
             {
                 Username = request.UserName,

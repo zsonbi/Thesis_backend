@@ -6,12 +6,14 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
 ARG MYSQL_USER
 ARG MYSQL_PASSWORD
 ARG DB_IP
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Thesis_backend.csproj", "."]
 RUN dotnet restore "./Thesis_backend.csproj"

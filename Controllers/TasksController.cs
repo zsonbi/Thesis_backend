@@ -118,6 +118,10 @@ namespace Thesis_backend.Controllers
             {
                 return NotFound("No user is logged in");
             }
+            if (request.TaskName == "")
+            {
+                return BadRequest("Please give the task a name");
+            }
 
             Data_Structures.PlayerTask taskToSave = new Data_Structures.PlayerTask()
             {
