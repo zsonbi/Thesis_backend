@@ -29,7 +29,8 @@ services:
     volumes:
       - ./docker:/scripts  # Mount the folder where your init scripts are
     restart: "no"
-
+    command: /bin/sh -c "apk add --no-cache dos2unix && dos2unix /scripts/init.sh && \
+             chmod +x /scripts/init.sh && /scripts/init.sh"
 
   mariadb:
     image: mariadb:11.4.2-noble
