@@ -42,6 +42,6 @@ jobs:
       - name: Build and analyze
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"zsonbi_Thesis_backend_6010fbd9-209b-4942-a21d-6690eff103da" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }} /d:sonar.exclusions="**/MIGRATIONS/**""
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"zsonbi_Thesis_backend_6010fbd9-209b-4942-a21d-6690eff103da" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" /d:sonar.exclusions="**/MIGRATIONS/**"
           dotnet build
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
