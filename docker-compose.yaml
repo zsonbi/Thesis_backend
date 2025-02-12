@@ -1,0 +1,179 @@
+version: '3.8'
+
+x-mariadb-common: &mariadb-common
+  image: mariadb:11.4.2-noble
+  environment:
+    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    MYSQL_USER: ${MYSQL_USER}
+    MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  restart: unless-stopped
+  depends_on:
+    init:
+      condition: service_completed_successfully
+  healthcheck:
+    test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+    start_period: 1m
+    start_interval: 10s
+    interval: 1m
+    timeout: 5s
+    retries: 3
+  networks:
+    thesis-internal-network:
+      ipv4_address: ${DB_IP}
+
+x-migration-common: &migration-common
+    tty: true
+    stdin_open: true
+    image: thesis_migration
+    build:
+      dockerfile: Dockerfile_db_migration
+      args:
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - DB_IP=${DB_IP}
+    volumes:
+      - ./MIGRATIONS:/app/MIGRATIONS  
+    networks:
+      thesis-internal-network:
+        ipv4_address: ${MIGRATION_IP}
+
+
+services:
+  migration-prod:
+    <<: *migration-common 
+    depends_on:
+      mariadb-prod:
+        condition: service_healthy
+    profiles:
+      - prod
+
+  migration-dev:
+    <<: *migration-common 
+    depends_on:
+      mariadb-dev:
+        condition: service_healthy
+    profiles:
+      - only-db
+      - dev
+
+  init:
+    image: alpine:latest  # Use a lightweight image like Alpine
+    container_name: init_service
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./docker:/scripts  # Mount the folder where your init scripts are
+      - ./data/temp:/data/temp:rw
+      - ./configs:/configs/:rw
+    command: /bin/sh -c "apk add --no-cache dos2unix && dos2unix /scripts/init.sh && \
+            chmod +x /scripts/init.sh && /scripts/init.sh && dos2unix /configs/scripts/init.sh &&  chmod +x /configs/scripts/init.sh && /configs/scripts/init.sh"
+    restart: "no"
+
+
+  certbot-web:
+      image: nginx:latest
+      ports:
+        - "80:80" 
+      volumes:
+        - ./data/nginx/www/:/var/www/certbot/       # Serve Certbot validation files
+        - ./data/temp/nginx_cert/:/etc/nginx/conf.d/
+        - ./configs/certs:/certs:rw
+        - ./data/temp/:/data/temp/:rw
+      environment:
+        - NGINX_HOST=${DOMAIN}
+        - DOMAIN=${DOMAIN} # Example: domain1.com,domain2.com
+      depends_on:
+        init:
+          condition: service_completed_successfully
+      entrypoint: >
+        sh -c "
+        nginx && 
+        while [ ! -f /data/temp/certbot-complete.flag ]; do 
+          sleep 1; 
+        done; 
+        echo 'Certificate generated. Stopping nginx...'; 
+        nginx -s stop;
+        rm -rf /data/temp/certbot-complete.flag;
+        chmod 777 -R /data/temp/certs;
+        "
+
+  certbot:
+      image: certbot/certbot:latest
+      volumes:
+        - ./data/nginx/www/:/var/www/certbot/:rw
+        - ./data/certbot:/etc/letsencrypt:rw
+        - ./configs/certs:/certs:rw
+        - ./data/temp:/data/temp
+      environment:
+        - DOMAIN=${DOMAIN} # Example: domain1.com,domain2.com
+      depends_on:
+        certbot-web:
+          condition: service_started
+      entrypoint: sh /certs/certbot.sh
+
+
+  mariadb-prod:
+    <<: *mariadb-common  # Same config as 'mariadb'
+    volumes:
+      - ./docker/initSQL/:/docker-entrypoint-initdb.d/
+      - ./data/db/:/var/lib/mysql/
+    profiles:
+      - prod
+
+  mariadb-dev:
+    <<: *mariadb-common  # Same config as 'mariadb'
+    volumes:
+      - ./docker/initSQL/:/docker-entrypoint-initdb.d/
+    profiles:
+      - dev  # Only runs in the 'dev' profile
+      - only-db
+    ports:
+      - "3306:3306"  # Exposes port only in 'dev' profile
+
+  thesis:
+    tty: true
+    stdin_open: true
+    image: thesis
+    build:
+      dockerfile: Dockerfile
+      args:
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - DB_IP=${DB_IP}
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    volumes:
+      - ./data/backend_data:/home/app/Data
+      - ./data/temp/certs:/app/certs/:rw
+    environment:
+      - DOMAIN=${DOMAIN}
+      - ASPNETCORE_URLS=http://*:8000;https://*:8001
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/certs/fullchain.pem
+      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/certs/privkey.pem
+    restart: unless-stopped
+    profiles:
+      - prod
+    depends_on:
+      migration-prod:
+        condition: service_completed_successfully
+      mariadb-prod:
+        condition: service_started
+      certbot-web:
+        condition: service_completed_successfully
+    networks:
+      thesis-internal-network:
+        ipv4_address: ${SERVER_IP}
+
+networks:
+  thesis-internal-network:
+    name: thesis_internal_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${SUBNET}
+          gateway: ${GATEWAY}

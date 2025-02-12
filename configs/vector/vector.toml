@@ -1,0 +1,7 @@
+[sources.docker_logs]
+  type = "docker_logs"
+
+[sinks.graylog]
+  type = "gelf"
+  inputs = ["docker_logs"]
+  address = "udp://172.16.4.2:12201"
