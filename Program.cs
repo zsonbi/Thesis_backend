@@ -63,7 +63,7 @@ namespace Thesis_backend
             if (graylog_ip != "none" && graylog_port != 0)
             {
                 Log.Logger = new LoggerConfiguration()
-                   .MinimumLevel.Information() // Set the minimum log level
+                   .MinimumLevel.Warning() // Set the minimum log level
                    .WriteTo.Console()
                    .WriteTo.Graylog(new GraylogSinkOptions
                    {
