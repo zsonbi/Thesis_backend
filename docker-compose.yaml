@@ -144,6 +144,7 @@ services:
         - MYSQL_USER=${MYSQL_USER}
         - MYSQL_PASSWORD=${MYSQL_PASSWORD}
         - DB_IP=${DB_IP}
+
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -151,6 +152,8 @@ services:
       - ./data/backend_data:/home/app/Data
       - ./data/temp/certs:/app/certs/:rw
     environment:
+      - GRAYLOG_IP=${GRAYLOG_IP}
+      - GRAYLOG_PORT=${GRAYLOG_PORT}
       - DOMAIN=${DOMAIN}
       - ASPNETCORE_URLS=http://*:8000;https://*:8001
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/certs/fullchain.pem
