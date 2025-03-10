@@ -25,7 +25,6 @@ x-mariadb-common: &mariadb-common
 x-migration-common: &migration-common
     tty: true
     stdin_open: true
-    image: thesis_migration
     build:
       dockerfile: Dockerfile_db_migration
       args:
@@ -143,7 +142,6 @@ services:
   thesis:
     tty: true
     stdin_open: true
-    image: thesis
     build:
       dockerfile: Dockerfile
       args:
