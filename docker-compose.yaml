@@ -47,6 +47,7 @@ services:
         condition: service_healthy
     profiles:
       - prod
+      - prod-proxied
 
   migration-dev:
     <<: *migration-common 
@@ -76,6 +77,8 @@ services:
 
   certbot-web:
       image: nginx:latest
+      profiles:
+        - prod
       ports:
         - "80:80" 
       volumes:
@@ -103,6 +106,8 @@ services:
 
   certbot:
       image: certbot/certbot:latest
+      profiles:
+        - prod
       volumes:
         - ./data/nginx/www/:/var/www/certbot/:rw
         - ./data/certbot:/etc/letsencrypt:rw
@@ -123,6 +128,7 @@ services:
       - ./data/db/:/var/lib/mysql/
     profiles:
       - prod
+      - prod-proxied
 
   mariadb-dev:
     <<: *mariadb-common  # Same config as 'mariadb'
@@ -161,6 +167,7 @@ services:
     restart: unless-stopped
     profiles:
       - prod
+      - prod-proxied
     depends_on:
       migration-prod:
         condition: service_completed_successfully
