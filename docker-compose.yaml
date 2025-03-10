@@ -173,8 +173,6 @@ services:
         condition: service_completed_successfully
       mariadb-prod:
         condition: service_started
-      certbot-web:
-        condition: service_completed_successfully
     networks:
       thesis-internal-network:
         ipv4_address: ${SERVER_IP}
