@@ -1,0 +1,100 @@
+version: '3.8'
+services:
+  migration:
+    tty: true
+    stdin_open: true
+    image: thesis_migration
+    build:
+      dockerfile: Dockerfile_db_migration
+      args:
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - DB_IP=${DB_IP}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - ./MIGRATIONS:/app/MIGRATIONS  
+    networks:
+      thesis-internal-network:
+        ipv4_address: ${MIGRATION_IP}
+
+  init:
+    image: alpine:latest  # Use a lightweight image like Alpine
+    container_name: init_service
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ./docker:/scripts  # Mount the folder where your init scripts are
+    restart: "no"
+
+
+  mariadb:
+    image: mariadb:11.4.2-noble
+    environment:
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_USER: ${MYSQL_USER}
+       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+        - ./docker/initSQL/:/docker-entrypoint-initdb.d/
+        - ./DbData/:/var/lib/mysql/
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 1m
+      start_interval: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    networks:
+      thesis-internal-network:
+        ipv4_address: ${DB_IP}
+
+  thesis:
+    tty: true
+    stdin_open: true
+    image: thesis
+    build:
+      dockerfile: Dockerfile
+      args:
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - DB_IP=${DB_IP}
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    volumes:
+      -  /etc/letsencrypt/live/thesis.picidolgok.hu/fullchain.pem:/app/certs/fullchain.pem
+      -  /etc/letsencrypt/live/thesis.picidolgok.hu/privkey.pem:/app/certs/privkey.pem 
+    # volumes:
+    #   - ./LogoBackend/Data:/app/Data
+    environment:
+      # - ASPNETCORE_URLS=http://[..]:8000
+      - ASPNETCORE_URLS=http://*:8000;https://*:8001
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/certs/fullchain.pem
+      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/certs/privkey.pem 
+    restart: unless-stopped
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_started
+    networks:
+      thesis-internal-network:
+        ipv4_address: ${SERVER_IP}
+
+
+
+networks:
+  thesis-internal-network:
+    name: thesis_internal_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${SUBNET}
+          gateway: ${GATEWAY}
