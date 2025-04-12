@@ -120,3 +120,4 @@ src/.vs/config/applicationhost.config
 docker/initSQL/1.sql
 /.sonarqube
 /data
+configs/certs/
