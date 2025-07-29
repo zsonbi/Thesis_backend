@@ -74,52 +74,6 @@ services:
     restart: "no"
 
 
-  certbot-web:
-      image: nginx:latest
-      profiles:
-        - prod
-      ports:
-        - "80:80" 
-      volumes:
-        - ./data/nginx/www/:/var/www/certbot/       # Serve Certbot validation files
-        - ./data/temp/nginx_cert/:/etc/nginx/conf.d/
-        - ./configs/certs:/certs:rw
-        - ./data/temp/:/data/temp/:rw
-      environment:
-        - NGINX_HOST=${DOMAIN}
-        - DOMAIN=${DOMAIN} # Example: domain1.com,domain2.com
-      depends_on:
-        init:
-          condition: service_completed_successfully
-      entrypoint: >
-        sh -c "
-        nginx && 
-        while [ ! -f /data/temp/certbot-complete.flag ]; do 
-          sleep 1; 
-        done; 
-        echo 'Certificate generated. Stopping nginx...'; 
-        nginx -s stop;
-        rm -rf /data/temp/certbot-complete.flag;
-        chmod 777 -R /data/temp/certs;
-        "
-
-  certbot:
-      image: certbot/certbot:latest
-      profiles:
-        - prod
-      volumes:
-        - ./data/nginx/www/:/var/www/certbot/:rw
-        - ./data/certbot:/etc/letsencrypt:rw
-        - ./configs/certs:/certs:rw
-        - ./data/temp:/data/temp
-      environment:
-        - DOMAIN=${DOMAIN} # Example: domain1.com,domain2.com
-      depends_on:
-        certbot-web:
-          condition: service_started
-      entrypoint: sh /certs/certbot.sh
-
-
   mariadb-prod:
     <<: *mariadb-common  # Same config as 'mariadb'
     volumes:
@@ -159,9 +113,7 @@ services:
       - GRAYLOG_IP=${GRAYLOG_IP}
       - GRAYLOG_PORT=${GRAYLOG_PORT}
       - DOMAIN=${DOMAIN}
-      - ASPNETCORE_URLS=http://*:8000;https://*:8001
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/certs/fullchain.pem
-      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/certs/privkey.pem
+      - ASPNETCORE_URLS=http://*:8000
     restart: unless-stopped
     profiles:
       - prod

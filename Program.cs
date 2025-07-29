@@ -82,14 +82,7 @@ namespace Thesis_backend
             options.UseMySql(connectionStrings[0],
 
             new MySqlServerVersion(new Version(10, 5, 9))));
-            if (domain != "localhost")
-            {
-                builder.Services.AddHttpsRedirection(options =>
-                {
-                    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-                    options.HttpsPort = 8001;
-                });
-            }
+         
             var app = builder.Build();
 
             // Enable CORS globally
@@ -99,10 +92,6 @@ namespace Thesis_backend
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseSession();
-            if (domain != "localhost")
-            {
-                app.UseHttpsRedirection();
-            }
 
             app.UseAuthorization();
 
