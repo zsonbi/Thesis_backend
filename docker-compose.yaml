@@ -8,7 +8,6 @@ x-mariadb-common: &mariadb-common
     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     MYSQL_DATABASE: ${MYSQL_DATABASE}
   restart: unless-stopped
-
   healthcheck:
     test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
     start_period: 1m
@@ -26,15 +25,12 @@ services:
   mariadb-prod:
     <<: *mariadb-common  # Same config as 'mariadb'
     volumes:
-      - ./docker/initSQL/:/docker-entrypoint-initdb.d/
       - ./data/db/:/var/lib/mysql/
     profiles:
       - prod
 
   mariadb-dev:
     <<: *mariadb-common  # Same config as 'mariadb'
-    volumes:
-      - ./docker/initSQL/:/docker-entrypoint-initdb.d/
     profiles:
       - dev  # Only runs in the 'dev' profile
       - only-db
