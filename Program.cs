@@ -85,6 +85,20 @@ namespace Thesis_backend
          
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ThesisDbContext>();
+                try
+                {
+                    dbContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Couldn't migrate " + ex.Message);
+                    return;
+                }
+            }
+
             // Enable CORS globally
             app.UseCors("AllowTrusted");
 

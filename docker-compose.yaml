@@ -1,16 +1,14 @@
-version: '3.8'
-
 x-mariadb-common: &mariadb-common
-  image: mariadb:11.4.2-noble
+  build:
+    context: .
+    dockerfile: ./Dockerfile_db
   environment:
     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     MYSQL_USER: ${MYSQL_USER}
     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-
+    MYSQL_DATABASE: ${MYSQL_DATABASE}
   restart: unless-stopped
-  depends_on:
-    init:
-      condition: service_completed_successfully
+
   healthcheck:
     test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
     start_period: 1m
@@ -19,61 +17,12 @@ x-mariadb-common: &mariadb-common
     timeout: 5s
     retries: 3
   networks:
-    thesis-internal-network:
-      ipv4_address: ${DB_IP}
+    - thesis-internal-network
 
-x-migration-common: &migration-common
-    tty: true
-    stdin_open: true
-    build:
-      dockerfile: Dockerfile_db_migration
-      args:
-        - MYSQL_USER=${MYSQL_USER}
-        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-        - DB_IP=${DB_IP}
-    volumes:
-      - ./MIGRATIONS:/app/MIGRATIONS  
-    networks:
-      thesis-internal-network:
-        ipv4_address: ${MIGRATION_IP}
+
 
 
 services:
-  migration-prod:
-    <<: *migration-common 
-    depends_on:
-      mariadb-prod:
-        condition: service_healthy
-    profiles:
-      - prod
-      - prod-proxied
-
-  migration-dev:
-    <<: *migration-common 
-    depends_on:
-      mariadb-dev:
-        condition: service_healthy
-    profiles:
-      - only-db
-      - dev
-
-  init:
-    image: alpine:latest  # Use a lightweight image like Alpine
-    container_name: init_service
-    environment:
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      DOMAIN: ${DOMAIN}
-    volumes:
-      - ./docker:/scripts  # Mount the folder where your init scripts are
-      - ./data/temp:/data/temp:rw
-      - ./configs:/configs/:rw
-    command: /bin/sh -c "apk add --no-cache dos2unix && dos2unix /scripts/init.sh && \
-            chmod +x /scripts/init.sh && /scripts/init.sh && dos2unix /configs/scripts/init.sh &&  chmod +x /configs/scripts/init.sh && /configs/scripts/init.sh"
-    restart: "no"
-
-
   mariadb-prod:
     <<: *mariadb-common  # Same config as 'mariadb'
     volumes:
@@ -81,7 +30,6 @@ services:
       - ./data/db/:/var/lib/mysql/
     profiles:
       - prod
-      - prod-proxied
 
   mariadb-dev:
     <<: *mariadb-common  # Same config as 'mariadb'
@@ -101,11 +49,9 @@ services:
       args:
         - MYSQL_USER=${MYSQL_USER}
         - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-        - DB_IP=${DB_IP}
-
+        - DB_IP=mariadb-prod
     ports:
       - "8000:8000"
-      - "8001:8001"
     volumes:
       - ./data/backend_data:/home/app/Data
       - ./data/temp/certs:/app/certs/:rw
@@ -117,21 +63,12 @@ services:
     restart: unless-stopped
     profiles:
       - prod
-      - prod-proxied
     depends_on:
-      migration-prod:
-        condition: service_completed_successfully
       mariadb-prod:
-        condition: service_started
+        condition: service_healthy
     networks:
-      thesis-internal-network:
-        ipv4_address: ${SERVER_IP}
+      - thesis-internal-network
 
 networks:
   thesis-internal-network:
-    name: thesis_internal_network
     driver: bridge
-    ipam:
-      config:
-        - subnet: ${SUBNET}
-          gateway: ${GATEWAY}
